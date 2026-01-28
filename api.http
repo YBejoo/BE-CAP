@@ -1,0 +1,342 @@
+# SI-CAP API - HTTP Request Examples
+# Gunakan extension REST Client di VS Code untuk test
+
+### Variables
+@baseUrl = http://localhost:8787
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Ik9MSGhYbFZwV2NQVkxMdk1KanZiYSIsImVtYWlsIjoiYWRtaW5Ac2ljYXAudGVzdCIsIm5hbWEiOiJBZG1pbiBTSS1DQVAiLCJyb2xlIjoiYWRtaW4iLCJpZF9wcm9kaSI6bnVsbCwiZXhwIjoxNzY5NzQzMjUxfQ.4Noe4pZy21gULSH1HYVOHaeR10dfrNg9q3SDE8g9mgs
+# IDs - Isi setelah create masing-masing resource
+@prodiId = GANTI_SETELAH_CREATE_PRODI
+@kurikulumId = GANTI_SETELAH_CREATE_KURIKULUM
+@profilLulusanId = GANTI_SETELAH_CREATE_PL
+@cplId = GANTI_SETELAH_CREATE_CPL
+@bkId = GANTI_SETELAH_CREATE_BK
+@mkId = GANTI_SETELAH_CREATE_MK
+@dosenId = GANTI_SETELAH_CREATE_DOSEN
+@cpmkId = GANTI_SETELAH_CREATE_CPMK
+@rpsId = GANTI_SETELAH_CREATE_RPS
+
+# ==================== HEALTH CHECK ====================
+
+### Health Check
+GET {{baseUrl}}/
+
+### Health Status
+GET {{baseUrl}}/health
+
+# ==================== AUTH ====================
+
+### Register Admin
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "admin@sicap.test",
+  "password": "admin123",
+  "nama": "Admin SI-CAP",
+  "role": "admin"
+}
+
+### Register Kaprodi
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "kaprodi@sicap.test",
+  "password": "kaprodi123",
+  "nama": "Kaprodi Informatika",
+  "role": "kaprodi"
+}
+
+### Register Dosen
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "dosen@sicap.test",
+  "password": "dosen123",
+  "nama": "Dr. Budi Santoso",
+  "role": "dosen"
+}
+
+### Login
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@sicap.test",
+  "password": "admin123"
+}
+
+### Get Current User
+GET {{baseUrl}}/api/auth/me
+Authorization: Bearer {{token}}
+
+### Refresh Token
+POST {{baseUrl}}/api/auth/refresh
+Authorization: Bearer {{token}}
+
+# ==================== PRODI ====================
+
+### Create Prodi
+POST {{baseUrl}}/api/prodi
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "kode_prodi": "IF001",
+  "nama_prodi": "Teknik Informatika",
+  "fakultas": "Fakultas Teknik",
+  "jenjang": "S1",
+  "akreditasi": "A"
+}
+
+### Get All Prodi
+GET {{baseUrl}}/api/prodi
+Authorization: Bearer {{token}}
+
+### Get Prodi by ID
+GET {{baseUrl}}/api/prodi/{{prodiId}}
+Authorization: Bearer {{token}}
+
+# ==================== KURIKULUM ====================
+
+### Create Kurikulum
+POST {{baseUrl}}/api/kurikulum
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "nama_kurikulum": "Kurikulum 2024 OBE",
+  "tahun_berlaku": 2024,
+  "is_active": true,
+  "id_prodi": "{{prodiId}}"
+}
+
+### Get All Kurikulum
+GET {{baseUrl}}/api/kurikulum
+Authorization: Bearer {{token}}
+
+### Activate Kurikulum
+PATCH {{baseUrl}}/api/kurikulum/{{kurikulumId}}/activate
+Authorization: Bearer {{token}}
+
+# ==================== PROFIL LULUSAN ====================
+
+### Create Profil Lulusan
+POST {{baseUrl}}/api/profil-lulusan
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "kode_profil": "PL-01",
+  "profil_lulusan": "Software Developer",
+  "deskripsi": "Mampu merancang dan mengembangkan perangkat lunak",
+  "sumber": "Tracer Study & Industry Need",
+  "id_kurikulum": "{{kurikulumId}}"
+}
+
+### Get Profil Lulusan by Kurikulum
+GET {{baseUrl}}/api/profil-lulusan/kurikulum/{{kurikulumId}}
+Authorization: Bearer {{token}}
+
+# ==================== CPL ====================
+
+### Create CPL
+POST {{baseUrl}}/api/cpl
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "kode_cpl": "CPL-01",
+  "deskripsi_cpl": "Mampu menerapkan pemikiran logis, kritis, sistematis, dan inovatif",
+  "aspek": "KU",
+  "id_kurikulum": "{{kurikulumId}}"
+}
+
+### Get All CPL
+GET {{baseUrl}}/api/cpl?id_kurikulum={{kurikulumId}}
+Authorization: Bearer {{token}}
+
+### Get Matrix CPL-PL
+GET {{baseUrl}}/api/cpl/matrix/pl?id_kurikulum={{kurikulumId}}
+Authorization: Bearer {{token}}
+
+### Save Matrix CPL-PL
+POST {{baseUrl}}/api/cpl/matrix/pl
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "mappings": [
+    { "id_cpl": "CPL_ID_1", "id_profil": "PL_ID_1" },
+    { "id_cpl": "CPL_ID_1", "id_profil": "PL_ID_2" }
+  ]
+}
+
+# ==================== BAHAN KAJIAN ====================
+
+### Create Bahan Kajian
+POST {{baseUrl}}/api/bahan-kajian
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "kode_bk": "BK-01",
+  "nama_bahan_kajian": "Algoritma dan Pemrograman",
+  "aspek": "KK",
+  "ranah_keilmuan": "Ilmu Komputer",
+  "id_kurikulum": "{{kurikulumId}}"
+}
+
+### Get Matrix CPL-BK
+GET {{baseUrl}}/api/bahan-kajian/matrix/cpl?id_kurikulum={{kurikulumId}}
+Authorization: Bearer {{token}}
+
+# ==================== MATA KULIAH ====================
+
+### Create Mata Kuliah
+POST {{baseUrl}}/api/mata-kuliah
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "kode_mk": "IF101",
+  "nama_mk": "Algoritma dan Pemrograman",
+  "sks": 3,
+  "semester": 1,
+  "sifat": "Wajib",
+  "deskripsi": "Mata kuliah dasar pemrograman",
+  "id_kurikulum": "{{kurikulumId}}"
+}
+
+### Get Mata Kuliah by Semester
+GET {{baseUrl}}/api/mata-kuliah/semester/1?id_kurikulum={{kurikulumId}}
+Authorization: Bearer {{token}}
+
+### Get Matrix CPL-MK
+GET {{baseUrl}}/api/mata-kuliah/matrix/cpl?id_kurikulum={{kurikulumId}}
+Authorization: Bearer {{token}}
+
+# ==================== DOSEN ====================
+
+### Create Dosen
+POST {{baseUrl}}/api/dosen
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "nip": "198501012010011001",
+  "nama_dosen": "Dr. Budi Santoso, M.Kom",
+  "email": "budi@university.ac.id",
+  "bidang_keahlian": "Software Engineering",
+  "jabatan_fungsional": "Lektor Kepala"
+}
+
+### Search Dosen
+GET {{baseUrl}}/api/dosen/search?q=budi
+Authorization: Bearer {{token}}
+
+### Assign Dosen to Mata Kuliah
+POST {{baseUrl}}/api/mata-kuliah/{{mkId}}/dosen
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "dosen_ids": ["DOSEN_ID_1", "DOSEN_ID_2"],
+  "tahun_akademik": "2024/2025",
+  "semester_akademik": "Ganjil",
+  "koordinator_id": "DOSEN_ID_1"
+}
+
+# ==================== CPMK ====================
+
+### Create CPMK
+POST {{baseUrl}}/api/cpmk
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "kode_cpmk": "CPMK-1",
+  "deskripsi_cpmk": "Mampu memahami konsep dasar algoritma",
+  "bobot_persentase": 30,
+  "id_mk": "{{mkId}}",
+  "id_cpl": "{{cplId}}"
+}
+
+### Create Sub-CPMK
+POST {{baseUrl}}/api/cpmk/{{cpmkId}}/sub
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "kode_sub": "L1.1",
+  "deskripsi_sub_cpmk": "Memahami notasi algoritma",
+  "indikator": "Dapat menjelaskan flowchart dan pseudocode",
+  "kriteria_penilaian": "Quiz dan tugas praktik"
+}
+
+# ==================== RPS ====================
+
+### Create RPS
+POST {{baseUrl}}/api/rps
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "id_mk": "{{mkId}}",
+  "tahun_akademik": "2024/2025",
+  "semester_akademik": "Ganjil",
+  "deskripsi_mk": "Mempelajari dasar-dasar algoritma dan pemrograman",
+  "pustaka_utama": "Introduction to Algorithms - CLRS",
+  "pustaka_pendukung": "Clean Code - Robert C. Martin"
+}
+
+### Add RPS Minggu
+POST {{baseUrl}}/api/rps/{{rpsId}}/minggu
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "minggu_ke": 1,
+  "materi": "Pengenalan Algoritma dan Flowchart",
+  "metode_pembelajaran": "[\"Ceramah\", \"Diskusi\", \"Praktikum\"]",
+  "waktu_menit": 150,
+  "pengalaman_belajar": "Mahasiswa mampu membuat flowchart sederhana",
+  "bentuk_penilaian": "[\"Quiz\", \"Tugas\"]",
+  "bobot_penilaian": 5
+}
+
+### Submit RPS for Validation
+PATCH {{baseUrl}}/api/rps/{{rpsId}}/submit
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "id_kaprodi": "KAPRODI_DOSEN_ID"
+}
+
+### Validate RPS (Kaprodi only)
+PATCH {{baseUrl}}/api/rps/{{rpsId}}/validate
+Authorization: Bearer {{token}}
+
+### Reject RPS (Kaprodi only)
+PATCH {{baseUrl}}/api/rps/{{rpsId}}/reject
+Authorization: Bearer {{token}}
+
+# ==================== LAPORAN ====================
+
+### Laporan Matrix CPL-MK
+GET {{baseUrl}}/api/laporan/cpl-mk?id_kurikulum={{kurikulumId}}
+Authorization: Bearer {{token}}
+
+### Laporan Status RPS
+GET {{baseUrl}}/api/laporan/rps-status?id_kurikulum={{kurikulumId}}&tahun_akademik=2024/2025
+Authorization: Bearer {{token}}
+
+### Laporan MK-Dosen
+GET {{baseUrl}}/api/laporan/mk-dosen?tahun_akademik=2024/2025&semester_akademik=Ganjil
+Authorization: Bearer {{token}}
+
+### Laporan Progress CPL
+GET {{baseUrl}}/api/laporan/cpl-progress?id_kurikulum={{kurikulumId}}
+Authorization: Bearer {{token}}

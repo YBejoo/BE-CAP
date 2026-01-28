@@ -1,38 +1,23 @@
 {
-  "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "be-cap",
-  "main": "src/index.ts",
-  "compatibility_date": "2026-01-13"
-  // "compatibility_flags": [
-  //   "nodejs_compat"
-  // ],
-  // "vars": {
-  //   "MY_VAR": "my-variable"
-  // },
-  // "kv_namespaces": [
-  //   {
-  //     "binding": "MY_KV_NAMESPACE",
-  //     "id": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-  //   }
-  // ],
-  // "r2_buckets": [
-  //   {
-  //     "binding": "MY_BUCKET",
-  //     "bucket_name": "my-bucket"
-  //   }
-  // ],
-  // "d1_databases": [
-  //   {
-  //     "binding": "MY_DB",
-  //     "database_name": "my-database",
-  //     "database_id": ""
-  //   }
-  // ],
-  // "ai": {
-  //   "binding": "AI"
-  // },
-  // "observability": {
-  //   "enabled": true,
-  //   "head_sampling_rate": 1
-  // }
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "si-cap-api",
+	"main": "src/index.ts",
+	"compatibility_date": "2026-01-13",
+	"compatibility_flags": [
+		"nodejs_compat"
+	],
+	// Environment variables
+	"vars": {
+		"ENVIRONMENT": "production"
+	},
+	// D1 Database
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "si-cap-db",
+			"database_id": "a492de18-7cde-4ee8-b251-50729cd36bf2",
+			"migrations_dir": "./migrations"
+		}
+	]
+	// vars = { ENVIRONMENT = "staging" }
 }

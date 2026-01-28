@@ -1,0 +1,1 @@
+ALTER TABLE `cpl` DROP COLUMN `basing`;

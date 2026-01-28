@@ -1,0 +1,4398 @@
+{
+  "info": {
+    "_postman_id": "si-cap-api-collection",
+    "name": "SI-CAP API",
+    "description": "Backend API untuk SI-CAP (Sistem Informasi Capaian Pembelajaran)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8787",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "prodiId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "kurikulumId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "profilLulusanId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "cplId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "bkId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "mkId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "dosenId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "cpmkId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "rpsId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "subCpmkId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "testTimestamp",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Set timestamp untuk unique data",
+          "if (!pm.collectionVariables.get('testTimestamp')) {",
+          "    pm.collectionVariables.set('testTimestamp', Date.now().toString());",
+          "}"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "Health Check",
+      "item": [
+        {
+          "name": "Health Check",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test: Status code should be 200",
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Test: Response time is acceptable",
+                  "pm.test('Response time is less than 2000ms', function() {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+                  "});",
+                  "",
+                  "// Test: Response has correct content type",
+                  "pm.test('Content-Type is present', function() {",
+                  "    pm.response.to.have.header('Content-Type');",
+                  "});",
+                  "",
+                  "console.log('Health Check passed!');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/",
+              "host": ["{{baseUrl}}"],
+              "path": [""]
+            }
+          }
+        },
+        {
+          "name": "Health Status",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test: Status code should be 200",
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Test: Response time is acceptable",
+                  "pm.test('Response time is less than 2000ms', function() {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+                  "});",
+                  "",
+                  "// Test: Response body structure",
+                  "pm.test('Response has valid structure', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.be.an('object');",
+                  "});",
+                  "",
+                  "console.log('Health Status endpoint is working!');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["health"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test: Status code should be 201 or 409 (if already exists)",
+                  "pm.test('Status code is 201 or 409', function() {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([201, 409, 200]);",
+                  "});",
+                  "",
+                  "// Test: Response has correct structure",
+                  "pm.test('Response has success property', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "});",
+                  "",
+                  "// Test: If success, response has data",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.success) {",
+                  "    pm.test('Response has data property', function() {",
+                  "        pm.expect(jsonData).to.have.property('data');",
+                  "    });",
+                  "    console.log('Admin registered successfully!');",
+                  "} else {",
+                  "    console.log('Admin already exists or registration failed:', jsonData.message);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "var timestamp = pm.collectionVariables.get('testTimestamp') || Date.now().toString();",
+                  "pm.collectionVariables.set('testTimestamp', timestamp);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@sicap.test\",\n  \"password\": \"admin123\",\n  \"nama\": \"Admin SI-CAP\",\n  \"role\": \"admin\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Register Kaprodi",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test: Status code should be 201 or 409 (if already exists)",
+                  "pm.test('Status code is 201 or 409', function() {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([201, 409, 200]);",
+                  "});",
+                  "",
+                  "// Test: Response has correct structure",
+                  "pm.test('Response has success property', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "});",
+                  "",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.success) {",
+                  "    console.log('Kaprodi registered successfully!');",
+                  "} else {",
+                  "    console.log('Kaprodi already exists or registration failed:', jsonData.message);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"kaprodi@sicap.test\",\n  \"password\": \"kaprodi123\",\n  \"nama\": \"Kaprodi Informatika\",\n  \"role\": \"kaprodi\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Register Dosen",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test: Status code should be 201 or 409 (if already exists)",
+                  "pm.test('Status code is 201 or 409', function() {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([201, 409, 200]);",
+                  "});",
+                  "",
+                  "// Test: Response has correct structure",
+                  "pm.test('Response has success property', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "});",
+                  "",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.success) {",
+                  "    console.log('Dosen registered successfully!');",
+                  "} else {",
+                  "    console.log('Dosen already exists or registration failed:', jsonData.message);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"dosen@sicap.test\",\n  \"password\": \"dosen123\",\n  \"nama\": \"Dr. Budi Santoso\",\n  \"role\": \"dosen\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test: Status code should be 200",
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Test: Response has correct structure",
+                  "pm.test('Response has success property', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "});",
+                  "",
+                  "// Test: Response has token",
+                  "pm.test('Response has token', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('data');",
+                  "    pm.expect(jsonData.data).to.have.property('token');",
+                  "    pm.expect(jsonData.data.token).to.be.a('string');",
+                  "    pm.expect(jsonData.data.token.length).to.be.above(0);",
+                  "});",
+                  "",
+                  "// Save token to collection variables",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.success && jsonData.data && jsonData.data.token) {",
+                  "    pm.collectionVariables.set('token', jsonData.data.token);",
+                  "    console.log('Token saved to collection variables');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@sicap.test\",\n  \"password\": \"admin123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Get Current User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test: Status code should be 200",
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Test: Response has correct structure",
+                  "pm.test('Response has success property', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "});",
+                  "",
+                  "// Test: Response has user data",
+                  "pm.test('Response has user data', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('data');",
+                  "    pm.expect(jsonData.data).to.have.property('email');",
+                  "});",
+                  "",
+                  "console.log('Current user retrieved successfully!');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "me"]
+            }
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test: Status code should be 200 or 401 (if token expired)",
+                  "pm.test('Status code is 200 or 401', function() {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 401]);",
+                  "});",
+                  "",
+                  "// Test: Response has correct structure",
+                  "pm.test('Response has success property', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "});",
+                  "",
+                  "// Save new token if available",
+                  "var jsonData = pm.response.json();",
+                  "if (pm.response.code === 200 && jsonData.success && jsonData.data && jsonData.data.token) {",
+                  "    pm.collectionVariables.set('token', jsonData.data.token);",
+                  "    console.log('Token refreshed and saved!');",
+                  "",
+                  "    pm.test('New token is returned', function() {",
+                  "        pm.expect(jsonData.data.token).to.be.a('string');",
+                  "    });",
+                  "} else if (pm.response.code === 401) {",
+                  "    console.log('Token expired or invalid - this is expected in some test scenarios');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/refresh",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "refresh"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Prodi",
+      "item": [
+        {
+          "name": "Create Prodi",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test: Status code should be 201",
+                  "pm.test('Status code is 201', function() {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "// Test: Response has correct structure",
+                  "pm.test('Response has success property', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "});",
+                  "",
+                  "// Test: Response has data with id",
+                  "pm.test('Response has data with id', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('data');",
+                  "    pm.expect(jsonData.data).to.have.property('id');",
+                  "});",
+                  "",
+                  "// Test: Prodi data is correct",
+                  "pm.test('Prodi data is correct', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.have.property('kode_prodi');",
+                  "    pm.expect(jsonData.data).to.have.property('nama_prodi');",
+                  "});",
+                  "",
+                  "// Save prodiId to collection variables",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.success && jsonData.data && jsonData.data.id) {",
+                  "    pm.collectionVariables.set('prodiId', jsonData.data.id);",
+                  "    console.log('prodiId saved:', jsonData.data.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "var timestamp = pm.collectionVariables.get('testTimestamp') || Date.now().toString();",
+                  "pm.variables.set('uniqueKode', 'IF' + timestamp.slice(-4));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"kode_prodi\": \"{{uniqueKode}}\",\n  \"nama_prodi\": \"Teknik Informatika\",\n  \"fakultas\": \"Fakultas Teknik\",\n  \"jenjang\": \"S1\",\n  \"akreditasi\": \"A\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/prodi",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "prodi"]
+            }
+          }
+        },
+        {
+          "name": "Get All Prodi",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test: Status code should be 200",
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Test: Response has correct structure",
+                  "pm.test('Response has success property', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "});",
+                  "",
+                  "// Test: Response has data array",
+                  "pm.test('Response has data array', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('data');",
+                  "    pm.expect(jsonData.data).to.be.an('array');",
+                  "});",
+                  "",
+                  "// Test: At least one prodi exists",
+                  "pm.test('At least one prodi exists', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data.length).to.be.above(0);",
+                  "});",
+                  "",
+                  "console.log('Get All Prodi successful!');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/prodi",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "prodi"]
+            }
+          }
+        },
+        {
+          "name": "Get Prodi by ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test: Status code should be 200",
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Test: Response has correct structure",
+                  "pm.test('Response has success property', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "});",
+                  "",
+                  "// Test: Response has prodi data",
+                  "pm.test('Response has prodi data', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('data');",
+                  "    pm.expect(jsonData.data).to.have.property('id');",
+                  "    pm.expect(jsonData.data.id).to.equal(pm.collectionVariables.get('prodiId'));",
+                  "});",
+                  "",
+                  "console.log('Get Prodi by ID successful!');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/prodi/{{prodiId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "prodi", "{{prodiId}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Prodi",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test: Status code should be 200",
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Test: Response has correct structure",
+                  "pm.test('Response has success property', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "});",
+                  "",
+                  "// Test: Updated data is returned",
+                  "pm.test('Updated data is returned', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('data');",
+                  "    pm.expect(jsonData.data.nama_prodi).to.include('Updated');",
+                  "});",
+                  "",
+                  "console.log('Update Prodi successful!');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nama_prodi\": \"Teknik Informatika (Updated)\",\n  \"akreditasi\": \"Unggul\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/prodi/{{prodiId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "prodi", "{{prodiId}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Prodi",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test: Status code should be 200 or 204",
+                  "pm.test('Status code is 200 or 204', function() {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
+                  "});",
+                  "",
+                  "// Test: Response has correct structure (if body exists)",
+                  "if (pm.response.text()) {",
+                  "    pm.test('Response has success property', function() {",
+                  "        var jsonData = pm.response.json();",
+                  "        pm.expect(jsonData).to.have.property('success');",
+                  "        pm.expect(jsonData.success).to.be.true;",
+                  "    });",
+                  "}",
+                  "",
+                  "console.log('Delete Prodi successful!');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/prodi/{{prodiId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "prodi", "{{prodiId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Kurikulum",
+      "item": [
+        {
+          "name": "Create Kurikulum",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Pre-request: Create a new Prodi for Kurikulum testing",
+                  "// This is needed because the previous Prodi was deleted in Delete Prodi test",
+                  "",
+                  "const baseUrl = pm.collectionVariables.get('baseUrl');",
+                  "const token = pm.collectionVariables.get('token');",
+                  "const uniqueKode = 'KUR' + Date.now().toString().slice(-6);",
+                  "",
+                  "// Use synchronous-like approach with pm.sendRequest",
+                  "const createProdi = new Promise((resolve, reject) => {",
+                  "    pm.sendRequest({",
+                  "        url: baseUrl + '/api/prodi',",
+                  "        method: 'POST',",
+                  "        header: {",
+                  "            'Content-Type': 'application/json',",
+                  "            'Authorization': 'Bearer ' + token",
+                  "        },",
+                  "        body: {",
+                  "            mode: 'raw',",
+                  "            raw: JSON.stringify({",
+                  "                kode_prodi: uniqueKode,",
+                  "                nama_prodi: 'Prodi untuk Kurikulum Test',",
+                  "                fakultas: 'Fakultas Teknik',",
+                  "                akreditasi: 'A',",
+                  "                jenjang: 'S1'",
+                  "            })",
+                  "        }",
+                  "    }, function (err, response) {",
+                  "        if (err) {",
+                  "            console.log('Error creating Prodi for Kurikulum:', err);",
+                  "            reject(err);",
+                  "            return;",
+                  "        }",
+                  "        ",
+                  "        var jsonData = response.json();",
+                  "        if (jsonData.success && jsonData.data && jsonData.data.id) {",
+                  "            pm.collectionVariables.set('prodiId', jsonData.data.id);",
+                  "            console.log('New prodiId created for Kurikulum:', jsonData.data.id);",
+                  "            resolve(jsonData.data.id);",
+                  "        } else {",
+                  "            console.log('Failed to create Prodi for Kurikulum:', JSON.stringify(jsonData));",
+                  "            reject(jsonData);",
+                  "        }",
+                  "    });",
+                  "});",
+                  "",
+                  "// Wait for the promise to resolve",
+                  "createProdi.then(() => {",
+                  "    console.log('Pre-request completed successfully');",
+                  "}).catch((error) => {",
+                  "    console.log('Pre-request failed:', error);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test: Status code should be 201",
+                  "pm.test('Status code is 201', function() {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "// Test: Response has correct structure",
+                  "pm.test('Response has success property', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "});",
+                  "",
+                  "// Test: Response has data with id",
+                  "pm.test('Response has data with id', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('data');",
+                  "    pm.expect(jsonData.data).to.have.property('id');",
+                  "});",
+                  "",
+                  "// Test: Kurikulum data is correct",
+                  "pm.test('Kurikulum data is correct', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.have.property('nama_kurikulum');",
+                  "    pm.expect(jsonData.data).to.have.property('tahun_berlaku');",
+                  "});",
+                  "",
+                  "// Save kurikulumId to collection variables",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.success && jsonData.data && jsonData.data.id) {",
+                  "    pm.collectionVariables.set('kurikulumId', jsonData.data.id);",
+                  "    console.log('kurikulumId saved:', jsonData.data.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nama_kurikulum\": \"Kurikulum 2024 OBE\",\n  \"tahun_berlaku\": 2024,\n  \"is_active\": true,\n  \"id_prodi\": \"{{prodiId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/kurikulum",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "kurikulum"]
+            }
+          }
+        },
+        {
+          "name": "Get All Kurikulum",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test: Status code should be 200",
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Test: Response has correct structure",
+                  "pm.test('Response has success property', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "});",
+                  "",
+                  "// Test: Response has data array",
+                  "pm.test('Response has data array', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('data');",
+                  "    pm.expect(jsonData.data).to.be.an('array');",
+                  "});",
+                  "",
+                  "console.log('Get All Kurikulum successful!');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/kurikulum",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "kurikulum"]
+            }
+          }
+        },
+        {
+          "name": "Get Kurikulum by ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test: Status code should be 200",
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Test: Response has correct structure",
+                  "pm.test('Response has success property', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "});",
+                  "",
+                  "// Test: Response has kurikulum data",
+                  "pm.test('Response has kurikulum data', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('data');",
+                  "    pm.expect(jsonData.data).to.have.property('id');",
+                  "});",
+                  "",
+                  "console.log('Get Kurikulum by ID successful!');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/kurikulum/{{kurikulumId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "kurikulum", "{{kurikulumId}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Kurikulum",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test: Status code should be 200",
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Test: Response has correct structure",
+                  "pm.test('Response has success property', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "});",
+                  "",
+                  "// Test: Updated data is returned",
+                  "pm.test('Updated data is returned', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('data');",
+                  "    pm.expect(jsonData.data.nama_kurikulum).to.include('Revisi');",
+                  "});",
+                  "",
+                  "console.log('Update Kurikulum successful!');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nama_kurikulum\": \"Kurikulum 2024 OBE (Revisi)\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/kurikulum/{{kurikulumId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "kurikulum", "{{kurikulumId}}"]
+            }
+          }
+        },
+        {
+          "name": "Activate Kurikulum",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test: Status code should be 200",
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Test: Response has correct structure",
+                  "pm.test('Response has success property', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "});",
+                  "",
+                  "console.log('Activate Kurikulum successful!');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/kurikulum/{{kurikulumId}}/activate",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "kurikulum", "{{kurikulumId}}", "activate"]
+            }
+          }
+        },
+        {
+          "name": "Delete Kurikulum",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test: Status code should be 200 or 204",
+                  "pm.test('Status code is 200 or 204', function() {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
+                  "});",
+                  "",
+                  "// Test: Response has correct structure (if body exists)",
+                  "if (pm.response.text()) {",
+                  "    pm.test('Response has success property', function() {",
+                  "        var jsonData = pm.response.json();",
+                  "        pm.expect(jsonData).to.have.property('success');",
+                  "    });",
+                  "}",
+                  "",
+                  "console.log('Delete Kurikulum successful!');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/kurikulum/{{kurikulumId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "kurikulum", "{{kurikulumId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Profil Lulusan",
+      "item": [
+        {
+          "name": "Create Profil Lulusan",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Pre-request: Create Prodi and Kurikulum for Profil Lulusan testing",
+                  "// This is needed because previous entities were deleted",
+                  "",
+                  "const baseUrl = pm.collectionVariables.get('baseUrl');",
+                  "const token = pm.collectionVariables.get('token');",
+                  "const uniqueKode = 'PL' + Date.now().toString().slice(-6);",
+                  "",
+                  "// First create Prodi",
+                  "pm.sendRequest({",
+                  "    url: baseUrl + '/api/prodi',",
+                  "    method: 'POST',",
+                  "    header: {",
+                  "        'Content-Type': 'application/json',",
+                  "        'Authorization': 'Bearer ' + token",
+                  "    },",
+                  "    body: {",
+                  "        mode: 'raw',",
+                  "        raw: JSON.stringify({",
+                  "            kode_prodi: uniqueKode,",
+                  "            nama_prodi: 'Prodi untuk Profil Lulusan Test',",
+                  "            fakultas: 'Fakultas Teknik',",
+                  "            akreditasi: 'A',",
+                  "            jenjang: 'S1'",
+                  "        })",
+                  "    }",
+                  "}, function (err, response) {",
+                  "    if (err) {",
+                  "        console.log('Error creating Prodi:', err);",
+                  "        return;",
+                  "    }",
+                  "    ",
+                  "    var jsonData = response.json();",
+                  "    if (jsonData.success && jsonData.data && jsonData.data.id) {",
+                  "        var newProdiId = jsonData.data.id;",
+                  "        pm.collectionVariables.set('prodiId', newProdiId);",
+                  "        console.log('New prodiId created:', newProdiId);",
+                  "        ",
+                  "        // Now create Kurikulum",
+                  "        pm.sendRequest({",
+                  "            url: baseUrl + '/api/kurikulum',",
+                  "            method: 'POST',",
+                  "            header: {",
+                  "                'Content-Type': 'application/json',",
+                  "                'Authorization': 'Bearer ' + token",
+                  "            },",
+                  "            body: {",
+                  "                mode: 'raw',",
+                  "                raw: JSON.stringify({",
+                  "                    nama_kurikulum: 'Kurikulum untuk Profil Lulusan Test',",
+                  "                    tahun_berlaku: 2024,",
+                  "                    is_active: true,",
+                  "                    id_prodi: newProdiId",
+                  "                })",
+                  "            }",
+                  "        }, function (err2, response2) {",
+                  "            if (err2) {",
+                  "                console.log('Error creating Kurikulum:', err2);",
+                  "                return;",
+                  "            }",
+                  "            ",
+                  "            var jsonData2 = response2.json();",
+                  "            if (jsonData2.success && jsonData2.data && jsonData2.data.id) {",
+                  "                pm.collectionVariables.set('kurikulumId', jsonData2.data.id);",
+                  "                console.log('New kurikulumId created:', jsonData2.data.id);",
+                  "            }",
+                  "        });",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test: Status code should be 201",
+                  "pm.test('Status code is 201', function() {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "// Test: Response has correct structure",
+                  "pm.test('Response has success property', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "});",
+                  "",
+                  "// Test: Response has data with id",
+                  "pm.test('Response has data with id', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('data');",
+                  "    pm.expect(jsonData.data).to.have.property('id');",
+                  "});",
+                  "",
+                  "// Test: Profil Lulusan data is correct",
+                  "pm.test('Profil Lulusan data is correct', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.have.property('kode_profil');",
+                  "    pm.expect(jsonData.data).to.have.property('profil_lulusan');",
+                  "});",
+                  "",
+                  "// Save profilLulusanId to collection variables",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.success && jsonData.data && jsonData.data.id) {",
+                  "    pm.collectionVariables.set('profilLulusanId', jsonData.data.id);",
+                  "    console.log('profilLulusanId saved:', jsonData.data.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"kode_profil\": \"PL-01\",\n  \"profil_lulusan\": \"Software Developer\",\n  \"deskripsi\": \"Mampu merancang dan mengembangkan perangkat lunak berkualitas\",\n  \"sumber\": \"Tracer Study & Industry Need\",\n  \"id_kurikulum\": \"{{kurikulumId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/profil-lulusan",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "profil-lulusan"]
+            }
+          }
+        },
+        {
+          "name": "Get All Profil Lulusan",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test: Status code should be 200",
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Test: Response has correct structure",
+                  "pm.test('Response has success property', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "});",
+                  "",
+                  "// Test: Response has data array",
+                  "pm.test('Response has data array', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('data');",
+                  "    pm.expect(jsonData.data).to.be.an('array');",
+                  "});",
+                  "",
+                  "console.log('Get All Profil Lulusan successful!');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/profil-lulusan",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "profil-lulusan"]
+            }
+          }
+        },
+        {
+          "name": "Get Profil Lulusan by Kurikulum",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test: Status code should be 200",
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Test: Response has correct structure",
+                  "pm.test('Response has success property', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "});",
+                  "",
+                  "// Test: Response has data array",
+                  "pm.test('Response has data array', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('data');",
+                  "    pm.expect(jsonData.data).to.be.an('array');",
+                  "});",
+                  "",
+                  "console.log('Get Profil Lulusan by Kurikulum successful!');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/profil-lulusan/kurikulum/{{kurikulumId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "profil-lulusan", "kurikulum", "{{kurikulumId}}"]
+            }
+          }
+        },
+        {
+          "name": "Get Profil Lulusan by ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test: Status code should be 200",
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Test: Response has correct structure",
+                  "pm.test('Response has success property', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "});",
+                  "",
+                  "// Test: Response has profil lulusan data",
+                  "pm.test('Response has profil lulusan data', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('data');",
+                  "    pm.expect(jsonData.data).to.have.property('id');",
+                  "});",
+                  "",
+                  "console.log('Get Profil Lulusan by ID successful!');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/profil-lulusan/{{profilLulusanId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "profil-lulusan", "{{profilLulusanId}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Profil Lulusan",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test: Status code should be 200",
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Test: Response has correct structure",
+                  "pm.test('Response has success property', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "});",
+                  "",
+                  "// Test: Updated data is returned",
+                  "pm.test('Updated data is returned', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('data');",
+                  "    pm.expect(jsonData.data.profil_lulusan).to.equal('Full Stack Developer');",
+                  "});",
+                  "",
+                  "console.log('Update Profil Lulusan successful!');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"profil_lulusan\": \"Full Stack Developer\",\n  \"deskripsi\": \"Mampu merancang dan mengembangkan aplikasi web dan mobile\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/profil-lulusan/{{profilLulusanId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "profil-lulusan", "{{profilLulusanId}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Profil Lulusan",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test: Status code should be 200 or 204",
+                  "pm.test('Status code is 200 or 204', function() {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
+                  "});",
+                  "",
+                  "// Test: Response has correct structure (if body exists)",
+                  "if (pm.response.text()) {",
+                  "    pm.test('Response has success property', function() {",
+                  "        var jsonData = pm.response.json();",
+                  "        pm.expect(jsonData).to.have.property('success');",
+                  "    });",
+                  "}",
+                  "",
+                  "console.log('Delete Profil Lulusan successful!');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/profil-lulusan/{{profilLulusanId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "profil-lulusan", "{{profilLulusanId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "CPL",
+      "item": [
+        {
+          "name": "Create CPL",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Pre-request: Create Prodi and Kurikulum for CPL testing",
+                  "",
+                  "const baseUrl = pm.collectionVariables.get('baseUrl');",
+                  "const token = pm.collectionVariables.get('token');",
+                  "const uniqueKode = 'CPL' + Date.now().toString().slice(-6);",
+                  "",
+                  "pm.sendRequest({",
+                  "    url: baseUrl + '/api/prodi',",
+                  "    method: 'POST',",
+                  "    header: {",
+                  "        'Content-Type': 'application/json',",
+                  "        'Authorization': 'Bearer ' + token",
+                  "    },",
+                  "    body: {",
+                  "        mode: 'raw',",
+                  "        raw: JSON.stringify({",
+                  "            kode_prodi: uniqueKode,",
+                  "            nama_prodi: 'Prodi untuk CPL Test',",
+                  "            akreditasi: 'A',",
+                  "            jenjang: 'S1'",
+                  "        })",
+                  "    }",
+                  "}, function (err, response) {",
+                  "    if (err) { console.log('Error creating Prodi:', err); return; }",
+                  "    var jsonData = response.json();",
+                  "    if (jsonData.success && jsonData.data && jsonData.data.id) {",
+                  "        var newProdiId = jsonData.data.id;",
+                  "        pm.collectionVariables.set('prodiId', newProdiId);",
+                  "        ",
+                  "        pm.sendRequest({",
+                  "            url: baseUrl + '/api/kurikulum',",
+                  "            method: 'POST',",
+                  "            header: {",
+                  "                'Content-Type': 'application/json',",
+                  "                'Authorization': 'Bearer ' + token",
+                  "            },",
+                  "            body: {",
+                  "                mode: 'raw',",
+                  "                raw: JSON.stringify({",
+                  "                    nama_kurikulum: 'Kurikulum untuk CPL Test',",
+                  "                    tahun_berlaku: 2024,",
+                  "                    is_active: true,",
+                  "                    id_prodi: newProdiId",
+                  "                })",
+                  "            }",
+                  "        }, function (err2, response2) {",
+                  "            if (err2) { console.log('Error creating Kurikulum:', err2); return; }",
+                  "            var jsonData2 = response2.json();",
+                  "            if (jsonData2.success && jsonData2.data && jsonData2.data.id) {",
+                  "                pm.collectionVariables.set('kurikulumId', jsonData2.data.id);",
+                  "                console.log('New kurikulumId for CPL:', jsonData2.data.id);",
+                  "            }",
+                  "        });",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test: Status code should be 201",
+                  "pm.test('Status code is 201', function() {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "// Test: Response has correct structure",
+                  "pm.test('Response has success property', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "});",
+                  "",
+                  "// Test: Response has data with id",
+                  "pm.test('Response has data with id', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('data');",
+                  "    pm.expect(jsonData.data).to.have.property('id');",
+                  "});",
+                  "",
+                  "// Test: CPL data is correct",
+                  "pm.test('CPL data is correct', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.have.property('kode_cpl');",
+                  "    pm.expect(jsonData.data).to.have.property('deskripsi_cpl');",
+                  "    pm.expect(jsonData.data).to.have.property('aspek');",
+                  "});",
+                  "",
+                  "// Save cplId to collection variables",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.success && jsonData.data && jsonData.data.id) {",
+                  "    pm.collectionVariables.set('cplId', jsonData.data.id);",
+                  "    console.log('cplId saved:', jsonData.data.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"kode_cpl\": \"CPL-01\",\n  \"deskripsi_cpl\": \"Mampu menerapkan pemikiran logis, kritis, sistematis, dan inovatif dalam konteks pengembangan ilmu pengetahuan dan teknologi\",\n  \"aspek\": \"KU\",\n  \"id_kurikulum\": \"{{kurikulumId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/cpl",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "cpl"]
+            }
+          }
+        },
+        {
+          "name": "Get All CPL",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test: Status code should be 200",
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Test: Response has correct structure",
+                  "pm.test('Response has success property', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "});",
+                  "",
+                  "// Test: Response has data array",
+                  "pm.test('Response has data array', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('data');",
+                  "    pm.expect(jsonData.data).to.be.an('array');",
+                  "});",
+                  "",
+                  "console.log('Get All CPL successful!');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/cpl?id_kurikulum={{kurikulumId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "cpl"],
+              "query": [
+                {
+                  "key": "id_kurikulum",
+                  "value": "{{kurikulumId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get CPL by ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test: Status code should be 200",
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Test: Response has correct structure",
+                  "pm.test('Response has success property', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "});",
+                  "",
+                  "// Test: Response has CPL data",
+                  "pm.test('Response has CPL data', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('data');",
+                  "    pm.expect(jsonData.data).to.have.property('id');",
+                  "    pm.expect(jsonData.data).to.have.property('kode_cpl');",
+                  "});",
+                  "",
+                  "console.log('Get CPL by ID successful!');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/cpl/{{cplId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "cpl", "{{cplId}}"]
+            }
+          }
+        },
+        {
+          "name": "Update CPL",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test: Status code should be 200",
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Test: Response has correct structure",
+                  "pm.test('Response has success property', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "});",
+                  "",
+                  "// Test: Updated data is returned",
+                  "pm.test('Updated data is returned', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('data');",
+                  "    pm.expect(jsonData.data.deskripsi_cpl).to.include('Updated');",
+                  "});",
+                  "",
+                  "console.log('Update CPL successful!');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"deskripsi_cpl\": \"Mampu menerapkan pemikiran logis, kritis, sistematis, dan inovatif (Updated)\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/cpl/{{cplId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "cpl", "{{cplId}}"]
+            }
+          }
+        },
+        {
+          "name": "Get Matrix CPL-PL",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test: Status code should be 200",
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Test: Response has correct structure",
+                  "pm.test('Response has success property', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "});",
+                  "",
+                  "// Test: Response has data",
+                  "pm.test('Response has data', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('data');",
+                  "});",
+                  "",
+                  "console.log('Get Matrix CPL-PL successful!');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/cpl/matrix/pl?id_kurikulum={{kurikulumId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "cpl", "matrix", "pl"],
+              "query": [
+                {
+                  "key": "id_kurikulum",
+                  "value": "{{kurikulumId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Save Matrix CPL-PL",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Pre-request: Create Profil Lulusan for Matrix testing",
+                  "// CPL already exists from Create CPL, but Profil Lulusan was deleted",
+                  "",
+                  "const baseUrl = pm.collectionVariables.get('baseUrl');",
+                  "const token = pm.collectionVariables.get('token');",
+                  "const kurikulumId = pm.collectionVariables.get('kurikulumId');",
+                  "const uniqueKode = 'MTX' + Date.now().toString().slice(-6);",
+                  "",
+                  "// Create Profil Lulusan",
+                  "pm.sendRequest({",
+                  "    url: baseUrl + '/api/profil-lulusan',",
+                  "    method: 'POST',",
+                  "    header: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },",
+                  "    body: { mode: 'raw', raw: JSON.stringify({ kode_profil: 'PL-' + uniqueKode, profil_lulusan: 'Profile for Matrix Test', deskripsi: 'Test', sumber: 'Test Source', id_kurikulum: kurikulumId }) }",
+                  "}, function (err, response) {",
+                  "    if (err) { console.log('Error creating Profil Lulusan:', err); return; }",
+                  "    var data = response.json();",
+                  "    if (data.success && data.data) {",
+                  "        pm.collectionVariables.set('profilLulusanId', data.data.id);",
+                  "        console.log('profilLulusanId for Matrix:', data.data.id);",
+                  "    } else {",
+                  "        console.log('Failed to create Profil Lulusan:', JSON.stringify(data));",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test: Status code should be 200 or 201",
+                  "pm.test('Status code is 200 or 201', function() {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "});",
+                  "",
+                  "// Test: Response has correct structure",
+                  "pm.test('Response has success property', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "});",
+                  "",
+                  "console.log('Save Matrix CPL-PL successful!');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mappings\": [\n    { \"id_cpl\": \"{{cplId}}\", \"id_profil\": \"{{profilLulusanId}}\" }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/cpl/matrix/pl",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "cpl", "matrix", "pl"]
+            }
+          }
+        },
+        {
+          "name": "Delete CPL",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test: Status code should be 200 or 204",
+                  "pm.test('Status code is 200 or 204', function() {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
+                  "});",
+                  "",
+                  "// Test: Response has correct structure (if body exists)",
+                  "if (pm.response.text()) {",
+                  "    pm.test('Response has success property', function() {",
+                  "        var jsonData = pm.response.json();",
+                  "        pm.expect(jsonData).to.have.property('success');",
+                  "    });",
+                  "}",
+                  "",
+                  "console.log('Delete CPL successful!');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/cpl/{{cplId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "cpl", "{{cplId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Bahan Kajian",
+      "item": [
+        {
+          "name": "Create Bahan Kajian",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Pre-request: Create Prodi and Kurikulum for Bahan Kajian testing",
+                  "",
+                  "const baseUrl = pm.collectionVariables.get('baseUrl');",
+                  "const token = pm.collectionVariables.get('token');",
+                  "const uniqueKode = 'BK' + Date.now().toString().slice(-6);",
+                  "",
+                  "pm.sendRequest({",
+                  "    url: baseUrl + '/api/prodi',",
+                  "    method: 'POST',",
+                  "    header: {",
+                  "        'Content-Type': 'application/json',",
+                  "        'Authorization': 'Bearer ' + token",
+                  "    },",
+                  "    body: {",
+                  "        mode: 'raw',",
+                  "        raw: JSON.stringify({",
+                  "            kode_prodi: uniqueKode,",
+                  "            nama_prodi: 'Prodi untuk Bahan Kajian Test',",
+                  "            fakultas: 'Fakultas Teknik',",
+                  "            akreditasi: 'A',",
+                  "            jenjang: 'S1'",
+                  "        })",
+                  "    }",
+                  "}, function (err, response) {",
+                  "    if (err) { console.log('Error creating Prodi:', err); return; }",
+                  "    var jsonData = response.json();",
+                  "    if (jsonData.success && jsonData.data && jsonData.data.id) {",
+                  "        var newProdiId = jsonData.data.id;",
+                  "        pm.collectionVariables.set('prodiId', newProdiId);",
+                  "        ",
+                  "        pm.sendRequest({",
+                  "            url: baseUrl + '/api/kurikulum',",
+                  "            method: 'POST',",
+                  "            header: {",
+                  "                'Content-Type': 'application/json',",
+                  "                'Authorization': 'Bearer ' + token",
+                  "            },",
+                  "            body: {",
+                  "                mode: 'raw',",
+                  "                raw: JSON.stringify({",
+                  "                    nama_kurikulum: 'Kurikulum untuk BK Test',",
+                  "                    tahun_berlaku: 2024,",
+                  "                    is_active: true,",
+                  "                    id_prodi: newProdiId",
+                  "                })",
+                  "            }",
+                  "        }, function (err2, response2) {",
+                  "            if (err2) { console.log('Error creating Kurikulum:', err2); return; }",
+                  "            var jsonData2 = response2.json();",
+                  "            if (jsonData2.success && jsonData2.data && jsonData2.data.id) {",
+                  "                pm.collectionVariables.set('kurikulumId', jsonData2.data.id);",
+                  "                console.log('New kurikulumId for BK:', jsonData2.data.id);",
+                  "            }",
+                  "        });",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test: Status code should be 201",
+                  "pm.test('Status code is 201', function() {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "// Test: Response has correct structure",
+                  "pm.test('Response has success property', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "});",
+                  "",
+                  "// Test: Response has data with id",
+                  "pm.test('Response has data with id', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('data');",
+                  "    pm.expect(jsonData.data).to.have.property('id');",
+                  "});",
+                  "",
+                  "// Test: Bahan Kajian data is correct",
+                  "pm.test('Bahan Kajian data is correct', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.have.property('kode_bk');",
+                  "    pm.expect(jsonData.data).to.have.property('nama_bahan_kajian');",
+                  "});",
+                  "",
+                  "// Save bkId to collection variables",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.success && jsonData.data && jsonData.data.id) {",
+                  "    pm.collectionVariables.set('bkId', jsonData.data.id);",
+                  "    console.log('bkId saved:', jsonData.data.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"kode_bk\": \"BK-01\",\n  \"nama_bahan_kajian\": \"Algoritma dan Pemrograman\",\n  \"aspek\": \"KK\",\n  \"ranah_keilmuan\": \"Ilmu Komputer\",\n  \"id_kurikulum\": \"{{kurikulumId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/bahan-kajian",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "bahan-kajian"]
+            }
+          }
+        },
+        {
+          "name": "Get All Bahan Kajian",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test: Status code should be 200",
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Test: Response has correct structure",
+                  "pm.test('Response has success property', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "});",
+                  "",
+                  "// Test: Response has data array",
+                  "pm.test('Response has data array', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('data');",
+                  "    pm.expect(jsonData.data).to.be.an('array');",
+                  "});",
+                  "",
+                  "console.log('Get All Bahan Kajian successful!');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/bahan-kajian?id_kurikulum={{kurikulumId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "bahan-kajian"],
+              "query": [
+                {
+                  "key": "id_kurikulum",
+                  "value": "{{kurikulumId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Bahan Kajian by ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test: Status code should be 200",
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Test: Response has correct structure",
+                  "pm.test('Response has success property', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "});",
+                  "",
+                  "// Test: Response has Bahan Kajian data",
+                  "pm.test('Response has Bahan Kajian data', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('data');",
+                  "    pm.expect(jsonData.data).to.have.property('id');",
+                  "});",
+                  "",
+                  "console.log('Get Bahan Kajian by ID successful!');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/bahan-kajian/{{bkId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "bahan-kajian", "{{bkId}}"]
+            }
+          }
+        },
+        {
+          "name": "Get Matrix CPL-BK",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test: Status code should be 200",
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Test: Response has correct structure",
+                  "pm.test('Response has success property', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "});",
+                  "",
+                  "// Test: Response has data",
+                  "pm.test('Response has data', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('data');",
+                  "});",
+                  "",
+                  "console.log('Get Matrix CPL-BK successful!');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/bahan-kajian/matrix/cpl?id_kurikulum={{kurikulumId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "bahan-kajian", "matrix", "cpl"],
+              "query": [
+                {
+                  "key": "id_kurikulum",
+                  "value": "{{kurikulumId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Save Matrix CPL-BK",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Pre-request: Create CPL for Matrix CPL-BK testing",
+                  "// BK already exists but CPL was deleted",
+                  "",
+                  "const baseUrl = pm.collectionVariables.get('baseUrl');",
+                  "const token = pm.collectionVariables.get('token');",
+                  "const kurikulumId = pm.collectionVariables.get('kurikulumId');",
+                  "const uniqueKode = 'MTXBK' + Date.now().toString().slice(-6);",
+                  "",
+                  "// Create CPL",
+                  "pm.sendRequest({",
+                  "    url: baseUrl + '/api/cpl',",
+                  "    method: 'POST',",
+                  "    header: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },",
+                  "    body: { mode: 'raw', raw: JSON.stringify({ kode_cpl: 'CPL-' + uniqueKode, deskripsi_cpl: 'CPL for Matrix BK Test', aspek: 'KU', id_kurikulum: kurikulumId }) }",
+                  "}, function (err, response) {",
+                  "    if (err) { console.log('Error creating CPL:', err); return; }",
+                  "    var data = response.json();",
+                  "    if (data.success && data.data) {",
+                  "        pm.collectionVariables.set('cplId', data.data.id);",
+                  "        console.log('cplId for Matrix BK:', data.data.id);",
+                  "    } else {",
+                  "        console.log('Failed to create CPL:', JSON.stringify(data));",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test: Status code should be 200 or 201",
+                  "pm.test('Status code is 200 or 201', function() {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "});",
+                  "",
+                  "// Test: Response has correct structure",
+                  "pm.test('Response has success property', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "});",
+                  "",
+                  "console.log('Save Matrix CPL-BK successful!');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mappings\": [\n    { \"id_cpl\": \"{{cplId}}\", \"id_bk\": \"{{bkId}}\" }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/bahan-kajian/matrix/cpl",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "bahan-kajian", "matrix", "cpl"]
+            }
+          }
+        },
+        {
+          "name": "Delete Bahan Kajian",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test: Status code should be 200 or 204",
+                  "pm.test('Status code is 200 or 204', function() {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
+                  "});",
+                  "",
+                  "// Test: Response has correct structure (if body exists)",
+                  "if (pm.response.text()) {",
+                  "    pm.test('Response has success property', function() {",
+                  "        var jsonData = pm.response.json();",
+                  "        pm.expect(jsonData).to.have.property('success');",
+                  "    });",
+                  "}",
+                  "",
+                  "console.log('Delete Bahan Kajian successful!');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/bahan-kajian/{{bkId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "bahan-kajian", "{{bkId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Mata Kuliah",
+      "item": [
+        {
+          "name": "Create Mata Kuliah",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Pre-request: Create Prodi and Kurikulum for Mata Kuliah testing",
+                  "",
+                  "const baseUrl = pm.collectionVariables.get('baseUrl');",
+                  "const token = pm.collectionVariables.get('token');",
+                  "const uniqueKode = 'MK' + Date.now().toString().slice(-6);",
+                  "pm.variables.set('uniqueMkKode', uniqueKode);",
+                  "",
+                  "pm.sendRequest({",
+                  "    url: baseUrl + '/api/prodi',",
+                  "    method: 'POST',",
+                  "    header: {",
+                  "        'Content-Type': 'application/json',",
+                  "        'Authorization': 'Bearer ' + token",
+                  "    },",
+                  "    body: {",
+                  "        mode: 'raw',",
+                  "        raw: JSON.stringify({",
+                  "            kode_prodi: uniqueKode,",
+                  "            nama_prodi: 'Prodi untuk MK Test',",
+                  "            fakultas: 'Fakultas Teknik',",
+                  "            akreditasi: 'A',",
+                  "            jenjang: 'S1'",
+                  "        })",
+                  "    }",
+                  "}, function (err, response) {",
+                  "    if (err) { console.log('Error creating Prodi:', err); return; }",
+                  "    var jsonData = response.json();",
+                  "    if (jsonData.success && jsonData.data && jsonData.data.id) {",
+                  "        var newProdiId = jsonData.data.id;",
+                  "        pm.collectionVariables.set('prodiId', newProdiId);",
+                  "        ",
+                  "        pm.sendRequest({",
+                  "            url: baseUrl + '/api/kurikulum',",
+                  "            method: 'POST',",
+                  "            header: {",
+                  "                'Content-Type': 'application/json',",
+                  "                'Authorization': 'Bearer ' + token",
+                  "            },",
+                  "            body: {",
+                  "                mode: 'raw',",
+                  "                raw: JSON.stringify({",
+                  "                    nama_kurikulum: 'Kurikulum untuk MK Test',",
+                  "                    tahun_berlaku: 2024,",
+                  "                    is_active: true,",
+                  "                    id_prodi: newProdiId",
+                  "                })",
+                  "            }",
+                  "        }, function (err2, response2) {",
+                  "            if (err2) { console.log('Error creating Kurikulum:', err2); return; }",
+                  "            var jsonData2 = response2.json();",
+                  "            if (jsonData2.success && jsonData2.data && jsonData2.data.id) {",
+                  "                pm.collectionVariables.set('kurikulumId', jsonData2.data.id);",
+                  "                console.log('New kurikulumId for MK:', jsonData2.data.id);",
+                  "            }",
+                  "        });",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test: Status code should be 201",
+                  "pm.test('Status code is 201', function() {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "// Test: Response has correct structure",
+                  "pm.test('Response has success property', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "});",
+                  "",
+                  "// Test: Response has data with id",
+                  "pm.test('Response has data with id', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('data');",
+                  "    pm.expect(jsonData.data).to.have.property('id');",
+                  "});",
+                  "",
+                  "// Test: Mata Kuliah data is correct",
+                  "pm.test('Mata Kuliah data is correct', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.have.property('kode_mk');",
+                  "    pm.expect(jsonData.data).to.have.property('nama_mk');",
+                  "    pm.expect(jsonData.data).to.have.property('sks');",
+                  "});",
+                  "",
+                  "// Save mkId to collection variables",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.success && jsonData.data && jsonData.data.id) {",
+                  "    pm.collectionVariables.set('mkId', jsonData.data.id);",
+                  "    console.log('mkId saved:', jsonData.data.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"kode_mk\": \"{{uniqueMkKode}}\",\n  \"nama_mk\": \"Algoritma dan Pemrograman\",\n  \"sks\": 3,\n  \"semester\": 1,\n  \"sifat\": \"Wajib\",\n  \"deskripsi\": \"Mata kuliah dasar pemrograman yang membahas konsep algoritma dan implementasinya\",\n  \"id_kurikulum\": \"{{kurikulumId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/mata-kuliah",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "mata-kuliah"]
+            }
+          }
+        },
+        {
+          "name": "Get All Mata Kuliah",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test: Status code should be 200",
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Test: Response has correct structure",
+                  "pm.test('Response has success property', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "});",
+                  "",
+                  "// Test: Response has data array",
+                  "pm.test('Response has data array', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('data');",
+                  "    pm.expect(jsonData.data).to.be.an('array');",
+                  "});",
+                  "",
+                  "console.log('Get All Mata Kuliah successful!');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/mata-kuliah?id_kurikulum={{kurikulumId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "mata-kuliah"],
+              "query": [
+                {
+                  "key": "id_kurikulum",
+                  "value": "{{kurikulumId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Mata Kuliah by Semester",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test: Status code should be 200",
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Test: Response has correct structure",
+                  "pm.test('Response has success property', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "});",
+                  "",
+                  "// Test: Response has data array",
+                  "pm.test('Response has data array', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('data');",
+                  "    pm.expect(jsonData.data).to.be.an('array');",
+                  "});",
+                  "",
+                  "// Test: All MK in response are from semester 1",
+                  "pm.test('All MK are from semester 1', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.data.length > 0) {",
+                  "        jsonData.data.forEach(function(mk) {",
+                  "            pm.expect(mk.semester).to.equal(1);",
+                  "        });",
+                  "    }",
+                  "});",
+                  "",
+                  "console.log('Get Mata Kuliah by Semester successful!');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/mata-kuliah/semester/1?id_kurikulum={{kurikulumId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "mata-kuliah", "semester", "1"],
+              "query": [
+                {
+                  "key": "id_kurikulum",
+                  "value": "{{kurikulumId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Mata Kuliah by ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test: Status code should be 200",
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Test: Response has correct structure",
+                  "pm.test('Response has success property', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "});",
+                  "",
+                  "// Test: Response has Mata Kuliah data",
+                  "pm.test('Response has Mata Kuliah data', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('data');",
+                  "    pm.expect(jsonData.data).to.have.property('id');",
+                  "    pm.expect(jsonData.data).to.have.property('kode_mk');",
+                  "});",
+                  "",
+                  "console.log('Get Mata Kuliah by ID successful!');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/mata-kuliah/{{mkId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "mata-kuliah", "{{mkId}}"]
+            }
+          }
+        },
+        {
+          "name": "Get Matrix CPL-MK",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test: Status code should be 200",
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Test: Response has correct structure",
+                  "pm.test('Response has success property', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "});",
+                  "",
+                  "// Test: Response has data",
+                  "pm.test('Response has data', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('data');",
+                  "});",
+                  "",
+                  "console.log('Get Matrix CPL-MK successful!');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/mata-kuliah/matrix/cpl?id_kurikulum={{kurikulumId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "mata-kuliah", "matrix", "cpl"],
+              "query": [
+                {
+                  "key": "id_kurikulum",
+                  "value": "{{kurikulumId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Save Matrix CPL-MK",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test: Status code should be 200 or 201",
+                  "pm.test('Status code is 200 or 201', function() {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "});",
+                  "",
+                  "// Test: Response has correct structure",
+                  "pm.test('Response has success property', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "});",
+                  "",
+                  "console.log('Save Matrix CPL-MK successful!');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mappings\": [\n    { \"id_cpl\": \"{{cplId}}\", \"id_mk\": \"{{mkId}}\" }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/mata-kuliah/matrix/cpl",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "mata-kuliah", "matrix", "cpl"]
+            }
+          }
+        },
+        {
+          "name": "Delete Mata Kuliah",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test: Status code should be 200 or 204",
+                  "pm.test('Status code is 200 or 204', function() {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
+                  "});",
+                  "",
+                  "// Test: Response has correct structure (if body exists)",
+                  "if (pm.response.text()) {",
+                  "    pm.test('Response has success property', function() {",
+                  "        var jsonData = pm.response.json();",
+                  "        pm.expect(jsonData).to.have.property('success');",
+                  "    });",
+                  "}",
+                  "",
+                  "console.log('Delete Mata Kuliah successful!');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/mata-kuliah/{{mkId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "mata-kuliah", "{{mkId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Dosen",
+      "item": [
+        {
+          "name": "Create Dosen",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test: Status code should be 201",
+                  "pm.test('Status code is 201', function() {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "// Test: Response has correct structure",
+                  "pm.test('Response has success property', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "});",
+                  "",
+                  "// Test: Response has data with id",
+                  "pm.test('Response has data with id', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('data');",
+                  "    pm.expect(jsonData.data).to.have.property('id');",
+                  "});",
+                  "",
+                  "// Test: Dosen data is correct",
+                  "pm.test('Dosen data is correct', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.have.property('nip');",
+                  "    pm.expect(jsonData.data).to.have.property('nama_dosen');",
+                  "});",
+                  "",
+                  "// Save dosenId to collection variables",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.success && jsonData.data && jsonData.data.id) {",
+                  "    pm.collectionVariables.set('dosenId', jsonData.data.id);",
+                  "    console.log('dosenId saved:', jsonData.data.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "var timestamp = pm.collectionVariables.get('testTimestamp') || Date.now().toString();",
+                  "pm.variables.set('uniqueNip', '1985010120100110' + timestamp.slice(-2));",
+                  "pm.variables.set('uniqueDosenEmail', 'dosen' + timestamp.slice(-4) + '@university.ac.id');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nip\": \"{{uniqueNip}}\",\n  \"nama_dosen\": \"Dr. Budi Santoso, M.Kom\",\n  \"email\": \"{{uniqueDosenEmail}}\",\n  \"bidang_keahlian\": \"Software Engineering\",\n  \"jabatan_fungsional\": \"Lektor Kepala\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/dosen",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dosen"]
+            }
+          }
+        },
+        {
+          "name": "Get All Dosen",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test: Status code should be 200",
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Test: Response has correct structure",
+                  "pm.test('Response has success property', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "});",
+                  "",
+                  "// Test: Response has data array",
+                  "pm.test('Response has data array', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('data');",
+                  "    pm.expect(jsonData.data).to.be.an('array');",
+                  "});",
+                  "",
+                  "console.log('Get All Dosen successful!');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/dosen",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dosen"]
+            }
+          }
+        },
+        {
+          "name": "Search Dosen",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test: Status code should be 200",
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Test: Response has correct structure",
+                  "pm.test('Response has success property', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "});",
+                  "",
+                  "// Test: Response has data array",
+                  "pm.test('Response has data array', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('data');",
+                  "    pm.expect(jsonData.data).to.be.an('array');",
+                  "});",
+                  "",
+                  "console.log('Search Dosen successful!');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/dosen/search?q=budi",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dosen", "search"],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "budi"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Dosen by ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test: Status code should be 200",
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Test: Response has correct structure",
+                  "pm.test('Response has success property', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "});",
+                  "",
+                  "// Test: Response has Dosen data",
+                  "pm.test('Response has Dosen data', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('data');",
+                  "    pm.expect(jsonData.data).to.have.property('id');",
+                  "    pm.expect(jsonData.data).to.have.property('nama_dosen');",
+                  "});",
+                  "",
+                  "console.log('Get Dosen by ID successful!');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/dosen/{{dosenId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dosen", "{{dosenId}}"]
+            }
+          }
+        },
+        {
+          "name": "Assign Dosen to MK",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Pre-request: Create MK for Assign Dosen testing",
+                  "",
+                  "const baseUrl = pm.collectionVariables.get('baseUrl');",
+                  "const token = pm.collectionVariables.get('token');",
+                  "const uniqueKode = 'ASGN' + Date.now().toString().slice(-6);",
+                  "",
+                  "// Create Prodi first",
+                  "pm.sendRequest({",
+                  "    url: baseUrl + '/api/prodi',",
+                  "    method: 'POST',",
+                  "    header: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },",
+                  "    body: { mode: 'raw', raw: JSON.stringify({ kode_prodi: uniqueKode, nama_prodi: 'Prodi Assign Test', fakultas: 'Fakultas Teknik', akreditasi: 'A', jenjang: 'S1' }) }",
+                  "}, function (err, response) {",
+                  "    if (err) { console.log('Error:', err); return; }",
+                  "    var data = response.json();",
+                  "    if (data.success && data.data) {",
+                  "        var prodiId = data.data.id;",
+                  "        ",
+                  "        // Create Kurikulum",
+                  "        pm.sendRequest({",
+                  "            url: baseUrl + '/api/kurikulum',",
+                  "            method: 'POST',",
+                  "            header: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },",
+                  "            body: { mode: 'raw', raw: JSON.stringify({ nama_kurikulum: 'Kurikulum Assign', tahun_berlaku: 2024, is_active: true, id_prodi: prodiId }) }",
+                  "        }, function (err2, response2) {",
+                  "            if (err2) { console.log('Error:', err2); return; }",
+                  "            var data2 = response2.json();",
+                  "            if (data2.success && data2.data) {",
+                  "                var kurikulumId = data2.data.id;",
+                  "                ",
+                  "                // Create Mata Kuliah",
+                  "                pm.sendRequest({",
+                  "                    url: baseUrl + '/api/mata-kuliah',",
+                  "                    method: 'POST',",
+                  "                    header: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },",
+                  "                    body: { mode: 'raw', raw: JSON.stringify({ kode_mk: 'MK' + uniqueKode, nama_mk: 'MK Assign Test', sks: 3, semester: 1, sifat: 'Wajib', id_kurikulum: kurikulumId }) }",
+                  "                }, function (err3, response3) {",
+                  "                    if (err3) { console.log('Error:', err3); return; }",
+                  "                    var data3 = response3.json();",
+                  "                    if (data3.success && data3.data) {",
+                  "                        pm.collectionVariables.set('mkId', data3.data.id);",
+                  "                        console.log('mkId for Assign:', data3.data.id);",
+                  "                    }",
+                  "                });",
+                  "            }",
+                  "        });",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test: Status code should be 200 or 201",
+                  "pm.test('Status code is 200 or 201', function() {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "});",
+                  "",
+                  "// Test: Response has correct structure",
+                  "pm.test('Response has success property', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "});",
+                  "",
+                  "console.log('Assign Dosen to MK successful!');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dosen_ids\": [\"{{dosenId}}\"],\n  \"tahun_akademik\": \"2024/2025\",\n  \"semester_akademik\": \"Ganjil\",\n  \"koordinator_id\": \"{{dosenId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/mata-kuliah/{{mkId}}/dosen",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "mata-kuliah", "{{mkId}}", "dosen"]
+            }
+          }
+        },
+        {
+          "name": "Delete Dosen",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test: Status code should be 200 or 204",
+                  "pm.test('Status code is 200 or 204', function() {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
+                  "});",
+                  "",
+                  "// Test: Response has correct structure (if body exists)",
+                  "if (pm.response.text()) {",
+                  "    pm.test('Response has success property', function() {",
+                  "        var jsonData = pm.response.json();",
+                  "        pm.expect(jsonData).to.have.property('success');",
+                  "    });",
+                  "}",
+                  "",
+                  "console.log('Delete Dosen successful!');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/dosen/{{dosenId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dosen", "{{dosenId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "CPMK",
+      "item": [
+        {
+          "name": "Create CPMK",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Pre-request: Create all dependencies for CPMK testing",
+                  "// CPMK requires: mkId and cplId",
+                  "",
+                  "const baseUrl = pm.collectionVariables.get('baseUrl');",
+                  "const token = pm.collectionVariables.get('token');",
+                  "const uniqueKode = 'CPMK' + Date.now().toString().slice(-6);",
+                  "",
+                  "// Create Prodi first",
+                  "pm.sendRequest({",
+                  "    url: baseUrl + '/api/prodi',",
+                  "    method: 'POST',",
+                  "    header: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },",
+                  "    body: { mode: 'raw', raw: JSON.stringify({ kode_prodi: uniqueKode, nama_prodi: 'Prodi CPMK Test', fakultas: 'Fakultas Teknik', akreditasi: 'A', jenjang: 'S1' }) }",
+                  "}, function (err, response) {",
+                  "    if (err) { console.log('Error:', err); return; }",
+                  "    var data = response.json();",
+                  "    if (data.success && data.data) {",
+                  "        var prodiId = data.data.id;",
+                  "        pm.collectionVariables.set('prodiId', prodiId);",
+                  "        ",
+                  "        // Create Kurikulum",
+                  "        pm.sendRequest({",
+                  "            url: baseUrl + '/api/kurikulum',",
+                  "            method: 'POST',",
+                  "            header: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },",
+                  "            body: { mode: 'raw', raw: JSON.stringify({ nama_kurikulum: 'Kurikulum CPMK', tahun_berlaku: 2024, is_active: true, id_prodi: prodiId }) }",
+                  "        }, function (err2, response2) {",
+                  "            if (err2) { console.log('Error:', err2); return; }",
+                  "            var data2 = response2.json();",
+                  "            if (data2.success && data2.data) {",
+                  "                var kurikulumId = data2.data.id;",
+                  "                pm.collectionVariables.set('kurikulumId', kurikulumId);",
+                  "                ",
+                  "                // Create CPL",
+                  "                pm.sendRequest({",
+                  "                    url: baseUrl + '/api/cpl',",
+                  "                    method: 'POST',",
+                  "                    header: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },",
+                  "                    body: { mode: 'raw', raw: JSON.stringify({ kode_cpl: 'CPL-' + uniqueKode, deskripsi_cpl: 'CPL Test', aspek: 'KU', id_kurikulum: kurikulumId }) }",
+                  "                }, function (err3, response3) {",
+                  "                    if (err3) { console.log('Error:', err3); return; }",
+                  "                    var data3 = response3.json();",
+                  "                    if (data3.success && data3.data) {",
+                  "                        pm.collectionVariables.set('cplId', data3.data.id);",
+                  "                        console.log('cplId for CPMK:', data3.data.id);",
+                  "                    }",
+                  "                });",
+                  "                ",
+                  "                // Create Mata Kuliah",
+                  "                pm.sendRequest({",
+                  "                    url: baseUrl + '/api/mata-kuliah',",
+                  "                    method: 'POST',",
+                  "                    header: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },",
+                  "                    body: { mode: 'raw', raw: JSON.stringify({ kode_mk: 'MK' + uniqueKode, nama_mk: 'MK Test', sks: 3, semester: 1, sifat: 'Wajib', id_kurikulum: kurikulumId }) }",
+                  "                }, function (err4, response4) {",
+                  "                    if (err4) { console.log('Error:', err4); return; }",
+                  "                    var data4 = response4.json();",
+                  "                    if (data4.success && data4.data) {",
+                  "                        pm.collectionVariables.set('mkId', data4.data.id);",
+                  "                        console.log('mkId for CPMK:', data4.data.id);",
+                  "                    }",
+                  "                });",
+                  "            }",
+                  "        });",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test: Status code should be 201",
+                  "pm.test('Status code is 201', function() {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "// Test: Response has correct structure",
+                  "pm.test('Response has success property', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "});",
+                  "",
+                  "// Test: Response has data with id",
+                  "pm.test('Response has data with id', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('data');",
+                  "    pm.expect(jsonData.data).to.have.property('id');",
+                  "});",
+                  "",
+                  "// Test: CPMK data is correct",
+                  "pm.test('CPMK data is correct', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.have.property('kode_cpmk');",
+                  "    pm.expect(jsonData.data).to.have.property('deskripsi_cpmk');",
+                  "});",
+                  "",
+                  "// Save cpmkId to collection variables",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.success && jsonData.data && jsonData.data.id) {",
+                  "    pm.collectionVariables.set('cpmkId', jsonData.data.id);",
+                  "    console.log('cpmkId saved:', jsonData.data.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"kode_cpmk\": \"CPMK-1\",\n  \"deskripsi_cpmk\": \"Mampu memahami konsep dasar algoritma dan struktur data\",\n  \"bobot_persentase\": 30,\n  \"id_mk\": \"{{mkId}}\",\n  \"id_cpl\": \"{{cplId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/cpmk",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "cpmk"]
+            }
+          }
+        },
+        {
+          "name": "Get All CPMK",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test: Status code should be 200",
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Test: Response has correct structure",
+                  "pm.test('Response has success property', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "});",
+                  "",
+                  "// Test: Response has data array",
+                  "pm.test('Response has data array', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('data');",
+                  "    pm.expect(jsonData.data).to.be.an('array');",
+                  "});",
+                  "",
+                  "console.log('Get All CPMK successful!');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/cpmk?id_mk={{mkId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "cpmk"],
+              "query": [
+                {
+                  "key": "id_mk",
+                  "value": "{{mkId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get CPMK by ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test: Status code should be 200",
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Test: Response has correct structure",
+                  "pm.test('Response has success property', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "});",
+                  "",
+                  "// Test: Response has CPMK data",
+                  "pm.test('Response has CPMK data', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('data');",
+                  "    pm.expect(jsonData.data).to.have.property('id');",
+                  "    pm.expect(jsonData.data).to.have.property('kode_cpmk');",
+                  "});",
+                  "",
+                  "console.log('Get CPMK by ID successful!');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/cpmk/{{cpmkId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "cpmk", "{{cpmkId}}"]
+            }
+          }
+        },
+        {
+          "name": "Create Sub-CPMK",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test: Status code should be 201",
+                  "pm.test('Status code is 201', function() {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "// Test: Response has correct structure",
+                  "pm.test('Response has success property', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "});",
+                  "",
+                  "// Test: Response has data with id",
+                  "pm.test('Response has data with id', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('data');",
+                  "    pm.expect(jsonData.data).to.have.property('id');",
+                  "});",
+                  "",
+                  "// Save subCpmkId to collection variables",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.success && jsonData.data && jsonData.data.id) {",
+                  "    pm.collectionVariables.set('subCpmkId', jsonData.data.id);",
+                  "    console.log('subCpmkId saved:', jsonData.data.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"kode_sub\": \"L1.1\",\n  \"deskripsi_sub_cpmk\": \"Memahami notasi algoritma dan flowchart\",\n  \"indikator\": \"Dapat menjelaskan dan membuat flowchart\",\n  \"kriteria_penilaian\": \"Quiz dan tugas praktik\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/cpmk/{{cpmkId}}/sub",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "cpmk", "{{cpmkId}}", "sub"]
+            }
+          }
+        },
+        {
+          "name": "Delete CPMK",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test: Status code should be 200 or 204",
+                  "pm.test('Status code is 200 or 204', function() {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
+                  "});",
+                  "",
+                  "// Test: Response has correct structure (if body exists)",
+                  "if (pm.response.text()) {",
+                  "    pm.test('Response has success property', function() {",
+                  "        var jsonData = pm.response.json();",
+                  "        pm.expect(jsonData).to.have.property('success');",
+                  "    });",
+                  "}",
+                  "",
+                  "console.log('Delete CPMK successful!');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/cpmk/{{cpmkId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "cpmk", "{{cpmkId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "RPS",
+      "item": [
+        {
+          "name": "Create RPS",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Pre-request: Create all dependencies for RPS testing",
+                  "// RPS requires: mkId",
+                  "",
+                  "const baseUrl = pm.collectionVariables.get('baseUrl');",
+                  "const token = pm.collectionVariables.get('token');",
+                  "const uniqueKode = 'RPS' + Date.now().toString().slice(-6);",
+                  "",
+                  "// Create Prodi first",
+                  "pm.sendRequest({",
+                  "    url: baseUrl + '/api/prodi',",
+                  "    method: 'POST',",
+                  "    header: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },",
+                  "    body: { mode: 'raw', raw: JSON.stringify({ kode_prodi: uniqueKode, nama_prodi: 'Prodi RPS Test', fakultas: 'Fakultas Teknik', akreditasi: 'A', jenjang: 'S1' }) }",
+                  "}, function (err, response) {",
+                  "    if (err) { console.log('Error:', err); return; }",
+                  "    var data = response.json();",
+                  "    if (data.success && data.data) {",
+                  "        var prodiId = data.data.id;",
+                  "        pm.collectionVariables.set('prodiId', prodiId);",
+                  "        ",
+                  "        // Create Kurikulum",
+                  "        pm.sendRequest({",
+                  "            url: baseUrl + '/api/kurikulum',",
+                  "            method: 'POST',",
+                  "            header: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },",
+                  "            body: { mode: 'raw', raw: JSON.stringify({ nama_kurikulum: 'Kurikulum RPS', tahun_berlaku: 2024, is_active: true, id_prodi: prodiId }) }",
+                  "        }, function (err2, response2) {",
+                  "            if (err2) { console.log('Error:', err2); return; }",
+                  "            var data2 = response2.json();",
+                  "            if (data2.success && data2.data) {",
+                  "                var kurikulumId = data2.data.id;",
+                  "                pm.collectionVariables.set('kurikulumId', kurikulumId);",
+                  "                ",
+                  "                // Create Mata Kuliah",
+                  "                pm.sendRequest({",
+                  "                    url: baseUrl + '/api/mata-kuliah',",
+                  "                    method: 'POST',",
+                  "                    header: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },",
+                  "                    body: { mode: 'raw', raw: JSON.stringify({ kode_mk: 'MK' + uniqueKode, nama_mk: 'MK untuk RPS', sks: 3, semester: 1, sifat: 'Wajib', id_kurikulum: kurikulumId }) }",
+                  "                }, function (err3, response3) {",
+                  "                    if (err3) { console.log('Error:', err3); return; }",
+                  "                    var data3 = response3.json();",
+                  "                    if (data3.success && data3.data) {",
+                  "                        pm.collectionVariables.set('mkId', data3.data.id);",
+                  "                        console.log('mkId for RPS:', data3.data.id);",
+                  "                    }",
+                  "                });",
+                  "            }",
+                  "        });",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test: Status code should be 201",
+                  "pm.test('Status code is 201', function() {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "// Test: Response has correct structure",
+                  "pm.test('Response has success property', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "});",
+                  "",
+                  "// Test: Response has data with id",
+                  "pm.test('Response has data with id', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('data');",
+                  "    pm.expect(jsonData.data).to.have.property('id');",
+                  "});",
+                  "",
+                  "// Test: RPS data is correct",
+                  "pm.test('RPS data is correct', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data).to.have.property('tahun_akademik');",
+                  "    pm.expect(jsonData.data).to.have.property('semester_akademik');",
+                  "});",
+                  "",
+                  "// Save rpsId to collection variables",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.success && jsonData.data && jsonData.data.id) {",
+                  "    pm.collectionVariables.set('rpsId', jsonData.data.id);",
+                  "    console.log('rpsId saved:', jsonData.data.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_mk\": \"{{mkId}}\",\n  \"tahun_akademik\": \"2024/2025\",\n  \"semester_akademik\": \"Ganjil\",\n  \"deskripsi_mk\": \"Mata kuliah ini membahas dasar-dasar algoritma dan pemrograman menggunakan bahasa pemrograman modern\",\n  \"pustaka_utama\": \"Introduction to Algorithms - CLRS\",\n  \"pustaka_pendukung\": \"Clean Code - Robert C. Martin\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/rps",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "rps"]
+            }
+          }
+        },
+        {
+          "name": "Get All RPS",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test: Status code should be 200",
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Test: Response has correct structure",
+                  "pm.test('Response has success property', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "});",
+                  "",
+                  "// Test: Response has data array",
+                  "pm.test('Response has data array', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('data');",
+                  "    pm.expect(jsonData.data).to.be.an('array');",
+                  "});",
+                  "",
+                  "console.log('Get All RPS successful!');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/rps?id_mk={{mkId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "rps"],
+              "query": [
+                {
+                  "key": "id_mk",
+                  "value": "{{mkId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get RPS by ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test: Status code should be 200",
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Test: Response has correct structure",
+                  "pm.test('Response has success property', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "});",
+                  "",
+                  "// Test: Response has RPS data",
+                  "pm.test('Response has RPS data', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('data');",
+                  "    pm.expect(jsonData.data).to.have.property('id');",
+                  "});",
+                  "",
+                  "console.log('Get RPS by ID successful!');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/rps/{{rpsId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "rps", "{{rpsId}}"]
+            }
+          }
+        },
+        {
+          "name": "Add RPS Minggu",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test: Status code should be 201",
+                  "pm.test('Status code is 201', function() {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "// Test: Response has correct structure",
+                  "pm.test('Response has success property', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "});",
+                  "",
+                  "// Test: Response has data",
+                  "pm.test('Response has data', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('data');",
+                  "});",
+                  "",
+                  "console.log('Add RPS Minggu successful!');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"minggu_ke\": 1,\n  \"materi\": \"Pengenalan Algoritma dan Flowchart\",\n  \"metode_pembelajaran\": \"[\\\"Ceramah\\\", \\\"Diskusi\\\", \\\"Praktikum\\\"]\",\n  \"waktu_menit\": 150,\n  \"pengalaman_belajar\": \"Mahasiswa mampu memahami konsep algoritma dan membuat flowchart sederhana\",\n  \"bentuk_penilaian\": \"[\\\"Quiz\\\", \\\"Tugas\\\"]\",\n  \"bobot_penilaian\": 5\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/rps/{{rpsId}}/minggu",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "rps", "{{rpsId}}", "minggu"]
+            }
+          }
+        },
+        {
+          "name": "Submit RPS for Validation",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Pre-request: Create fresh RPS and Dosen for Submit testing",
+                  "",
+                  "const baseUrl = pm.collectionVariables.get('baseUrl');",
+                  "const token = pm.collectionVariables.get('token');",
+                  "const uniqueKode = 'SUB' + Date.now().toString().slice(-6);",
+                  "",
+                  "// Create Prodi first",
+                  "pm.sendRequest({",
+                  "    url: baseUrl + '/api/prodi',",
+                  "    method: 'POST',",
+                  "    header: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },",
+                  "    body: { mode: 'raw', raw: JSON.stringify({ kode_prodi: uniqueKode, nama_prodi: 'Prodi Submit Test', fakultas: 'Fakultas Teknik', akreditasi: 'A', jenjang: 'S1' }) }",
+                  "}, function (err, response) {",
+                  "    if (err) { console.log('Error:', err); return; }",
+                  "    var data = response.json();",
+                  "    if (data.success && data.data) {",
+                  "        var prodiId = data.data.id;",
+                  "        ",
+                  "        // Create Kurikulum",
+                  "        pm.sendRequest({",
+                  "            url: baseUrl + '/api/kurikulum',",
+                  "            method: 'POST',",
+                  "            header: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },",
+                  "            body: { mode: 'raw', raw: JSON.stringify({ nama_kurikulum: 'Kurikulum Submit', tahun_berlaku: 2024, is_active: true, id_prodi: prodiId }) }",
+                  "        }, function (err2, response2) {",
+                  "            if (err2) { console.log('Error:', err2); return; }",
+                  "            var data2 = response2.json();",
+                  "            if (data2.success && data2.data) {",
+                  "                var kurikulumId = data2.data.id;",
+                  "                ",
+                  "                // Create MK",
+                  "                pm.sendRequest({",
+                  "                    url: baseUrl + '/api/mata-kuliah',",
+                  "                    method: 'POST',",
+                  "                    header: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },",
+                  "                    body: { mode: 'raw', raw: JSON.stringify({ kode_mk: 'MK' + uniqueKode, nama_mk: 'MK Submit', sks: 3, semester: 1, sifat: 'Wajib', id_kurikulum: kurikulumId }) }",
+                  "                }, function (err3, response3) {",
+                  "                    if (err3) { console.log('Error:', err3); return; }",
+                  "                    var data3 = response3.json();",
+                  "                    if (data3.success && data3.data) {",
+                  "                        var mkId = data3.data.id;",
+                  "                        pm.collectionVariables.set('mkId', mkId);",
+                  "                        ",
+                  "                        // Create RPS",
+                  "                        pm.sendRequest({",
+                  "                            url: baseUrl + '/api/rps',",
+                  "                            method: 'POST',",
+                  "                            header: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },",
+                  "                            body: { mode: 'raw', raw: JSON.stringify({ id_mk: mkId, tahun_akademik: '2024/2025', semester_akademik: 'Ganjil', deskripsi_mk: 'Desc', pustaka_utama: 'Book' }) }",
+                  "                        }, function (err4, response4) {",
+                  "                            if (err4) { console.log('Error:', err4); return; }",
+                  "                            var data4 = response4.json();",
+                  "                            if (data4.success && data4.data) {",
+                  "                                pm.collectionVariables.set('rpsId', data4.data.id);",
+                  "                                console.log('rpsId for Submit:', data4.data.id);",
+                  "                            }",
+                  "                        });",
+                  "                    }",
+                  "                });",
+                  "            }",
+                  "        });",
+                  "    }",
+                  "});",
+                  "",
+                  "// Create Dosen for kaprodi",
+                  "pm.sendRequest({",
+                  "    url: baseUrl + '/api/dosen',",
+                  "    method: 'POST',",
+                  "    header: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },",
+                  "    body: { mode: 'raw', raw: JSON.stringify({ nip: '1985' + uniqueKode, nama_dosen: 'Kaprodi Test', email: 'kaprodi' + uniqueKode + '@test.ac.id', bidang_keahlian: 'Test' }) }",
+                  "}, function (err, response) {",
+                  "    if (err) { console.log('Error creating dosen:', err); return; }",
+                  "    var data = response.json();",
+                  "    if (data.success && data.data) {",
+                  "        pm.collectionVariables.set('dosenId', data.data.id);",
+                  "        console.log('dosenId for Submit:', data.data.id);",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test: Status code should be 200",
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Test: Response has correct structure",
+                  "pm.test('Response has success property', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "});",
+                  "",
+                  "console.log('Submit RPS for Validation successful!');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_kaprodi\": \"{{dosenId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/rps/{{rpsId}}/submit",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "rps", "{{rpsId}}", "submit"]
+            }
+          }
+        },
+        {
+          "name": "Validate RPS (Kaprodi)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test: Status code should be 200",
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Test: Response has correct structure",
+                  "pm.test('Response has success property', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "});",
+                  "",
+                  "console.log('Validate RPS successful!');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/rps/{{rpsId}}/validate",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "rps", "{{rpsId}}", "validate"]
+            }
+          }
+        },
+        {
+          "name": "Reject RPS (Kaprodi)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Pre-request: Create fresh RPS and submit it for rejection testing",
+                  "",
+                  "const baseUrl = pm.collectionVariables.get('baseUrl');",
+                  "const token = pm.collectionVariables.get('token');",
+                  "const uniqueKode = 'REJ' + Date.now().toString().slice(-6);",
+                  "",
+                  "// Create Prodi first",
+                  "pm.sendRequest({",
+                  "    url: baseUrl + '/api/prodi',",
+                  "    method: 'POST',",
+                  "    header: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },",
+                  "    body: { mode: 'raw', raw: JSON.stringify({ kode_prodi: uniqueKode, nama_prodi: 'Prodi Reject Test', fakultas: 'Fakultas Teknik', akreditasi: 'A', jenjang: 'S1' }) }",
+                  "}, function (err, response) {",
+                  "    if (err) { console.log('Error:', err); return; }",
+                  "    var data = response.json();",
+                  "    if (data.success && data.data) {",
+                  "        var prodiId = data.data.id;",
+                  "        ",
+                  "        pm.sendRequest({",
+                  "            url: baseUrl + '/api/kurikulum',",
+                  "            method: 'POST',",
+                  "            header: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },",
+                  "            body: { mode: 'raw', raw: JSON.stringify({ nama_kurikulum: 'Kurikulum Reject', tahun_berlaku: 2024, is_active: true, id_prodi: prodiId }) }",
+                  "        }, function (err2, response2) {",
+                  "            if (err2) { console.log('Error:', err2); return; }",
+                  "            var data2 = response2.json();",
+                  "            if (data2.success && data2.data) {",
+                  "                var kurikulumId = data2.data.id;",
+                  "                ",
+                  "                pm.sendRequest({",
+                  "                    url: baseUrl + '/api/mata-kuliah',",
+                  "                    method: 'POST',",
+                  "                    header: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },",
+                  "                    body: { mode: 'raw', raw: JSON.stringify({ kode_mk: 'MK' + uniqueKode, nama_mk: 'MK Reject', sks: 3, semester: 1, sifat: 'Wajib', id_kurikulum: kurikulumId }) }",
+                  "                }, function (err3, response3) {",
+                  "                    if (err3) { console.log('Error:', err3); return; }",
+                  "                    var data3 = response3.json();",
+                  "                    if (data3.success && data3.data) {",
+                  "                        var mkId = data3.data.id;",
+                  "                        ",
+                  "                        // Create RPS",
+                  "                        pm.sendRequest({",
+                  "                            url: baseUrl + '/api/rps',",
+                  "                            method: 'POST',",
+                  "                            header: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },",
+                  "                            body: { mode: 'raw', raw: JSON.stringify({ id_mk: mkId, tahun_akademik: '2024/2025', semester_akademik: 'Ganjil', deskripsi_mk: 'Desc', pustaka_utama: 'Book' }) }",
+                  "                        }, function (err4, response4) {",
+                  "                            if (err4) { console.log('Error:', err4); return; }",
+                  "                            var data4 = response4.json();",
+                  "                            if (data4.success && data4.data) {",
+                  "                                var rpsId = data4.data.id;",
+                  "                                pm.collectionVariables.set('rpsId', rpsId);",
+                  "                                ",
+                  "                                // Submit RPS first so it can be rejected",
+                  "                                pm.sendRequest({",
+                  "                                    url: baseUrl + '/api/rps/' + rpsId + '/submit',",
+                  "                                    method: 'PATCH',",
+                  "                                    header: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },",
+                  "                                    body: { mode: 'raw', raw: JSON.stringify({ id_kaprodi: pm.collectionVariables.get('dosenId') }) }",
+                  "                                }, function (err5, response5) {",
+                  "                                    if (err5) { console.log('Error:', err5); return; }",
+                  "                                    console.log('RPS submitted for rejection test:', rpsId);",
+                  "                                });",
+                  "                            }",
+                  "                        });",
+                  "                    }",
+                  "                });",
+                  "            }",
+                  "        });",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test: Status code should be 200",
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Test: Response has correct structure",
+                  "pm.test('Response has success property', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "});",
+                  "",
+                  "console.log('Reject RPS successful!');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/rps/{{rpsId}}/reject",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "rps", "{{rpsId}}", "reject"]
+            }
+          }
+        },
+        {
+          "name": "Delete RPS",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test: Status code should be 200 or 204",
+                  "pm.test('Status code is 200 or 204', function() {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
+                  "});",
+                  "",
+                  "// Test: Response has correct structure (if body exists)",
+                  "if (pm.response.text()) {",
+                  "    pm.test('Response has success property', function() {",
+                  "        var jsonData = pm.response.json();",
+                  "        pm.expect(jsonData).to.have.property('success');",
+                  "    });",
+                  "}",
+                  "",
+                  "console.log('Delete RPS successful!');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/rps/{{rpsId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "rps", "{{rpsId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Laporan",
+      "item": [
+        {
+          "name": "Laporan Matrix CPL-MK",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test: Status code should be 200",
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Test: Response has correct structure",
+                  "pm.test('Response has success property', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "});",
+                  "",
+                  "// Test: Response has data",
+                  "pm.test('Response has data', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('data');",
+                  "});",
+                  "",
+                  "console.log('Laporan Matrix CPL-MK successful!');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/laporan/cpl-mk?id_kurikulum={{kurikulumId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "laporan", "cpl-mk"],
+              "query": [
+                {
+                  "key": "id_kurikulum",
+                  "value": "{{kurikulumId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Laporan Status RPS",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test: Status code should be 200",
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Test: Response has correct structure",
+                  "pm.test('Response has success property', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "});",
+                  "",
+                  "// Test: Response has data",
+                  "pm.test('Response has data', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('data');",
+                  "});",
+                  "",
+                  "console.log('Laporan Status RPS successful!');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/laporan/rps-status?id_kurikulum={{kurikulumId}}&tahun_akademik=2024/2025",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "laporan", "rps-status"],
+              "query": [
+                {
+                  "key": "id_kurikulum",
+                  "value": "{{kurikulumId}}"
+                },
+                {
+                  "key": "tahun_akademik",
+                  "value": "2024/2025"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Laporan MK-Dosen",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test: Status code should be 200",
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Test: Response has correct structure",
+                  "pm.test('Response has success property', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "});",
+                  "",
+                  "// Test: Response has data",
+                  "pm.test('Response has data', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('data');",
+                  "});",
+                  "",
+                  "console.log('Laporan MK-Dosen successful!');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/laporan/mk-dosen?tahun_akademik=2024/2025&semester_akademik=Ganjil",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "laporan", "mk-dosen"],
+              "query": [
+                {
+                  "key": "tahun_akademik",
+                  "value": "2024/2025"
+                },
+                {
+                  "key": "semester_akademik",
+                  "value": "Ganjil"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Laporan Progress CPL",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test: Status code should be 200",
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Test: Response has correct structure",
+                  "pm.test('Response has success property', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "});",
+                  "",
+                  "// Test: Response has data",
+                  "pm.test('Response has data', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('data');",
+                  "});",
+                  "",
+                  "console.log('Laporan Progress CPL successful!');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/laporan/cpl-progress?id_kurikulum={{kurikulumId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "laporan", "cpl-progress"],
+              "query": [
+                {
+                  "key": "id_kurikulum",
+                  "value": "{{kurikulumId}}"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

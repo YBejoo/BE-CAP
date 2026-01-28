@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1768892321290,
+      "tag": "0000_living_katie_power",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1769151413832,
+      "tag": "0001_tambah_basing",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1769151493994,
+      "tag": "0002_hapus_basing",
+      "breakpoints": true
+    }
+  ]
+}
