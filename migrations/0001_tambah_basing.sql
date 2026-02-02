@@ -1,1 +1,0 @@
-ALTER TABLE `cpl` ADD `basing` text NOT NULL;

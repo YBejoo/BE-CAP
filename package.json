@@ -26,11 +26,12 @@
     "nanoid": "^5.0.9"
   },
   "devDependencies": {
-    "wrangler": "^4.4.0",
     "@cloudflare/workers-types": "^4.20241205.0",
+    "better-sqlite3": "^12.6.2",
     "drizzle-kit": "^0.28.0",
-    "typescript": "^5.7.2",
     "newman": "^6.2.1",
-    "newman-reporter-html": "^1.0.5"
+    "newman-reporter-html": "^1.0.5",
+    "typescript": "^5.7.2",
+    "wrangler": "^4.4.0"
   }
 }
