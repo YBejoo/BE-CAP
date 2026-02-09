@@ -11,3 +11,4 @@ export { default as mataKuliahRoutes } from './mata-kuliah';
 export { default as cpmkRoutes } from './cpmk';
 export { default as rpsRoutes } from './rps';
 export { default as laporanRoutes } from './laporan';
+export { default as dashboardRoutes } from './dashboard';

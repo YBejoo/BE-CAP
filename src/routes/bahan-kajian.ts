@@ -15,7 +15,7 @@ const app = new Hono<AppContext>();
 // GET /api/bahan-kajian
 app.get('/', async (c) => {
   const db = c.get('db');
-  const { id_kurikulum, aspek } = c.req.query();
+  const { id_kurikulum, aspek, enrich } = c.req.query();
 
   try {
     let query = db.select({
@@ -43,6 +43,32 @@ app.get('/', async (c) => {
     }
 
     const result = await query.orderBy(bahanKajian.kode_bk);
+    
+    // Enrich with cpl_list if requested
+    if (enrich === 'true' || enrich === 'cpl') {
+      const enrichedResult = await Promise.all(result.map(async (bkItem) => {
+        // Get CPL list from matrix
+        const matrixItems = await db.select({
+          cpl: {
+            id: cpl.id,
+            kode_cpl: cpl.kode_cpl,
+            deskripsi_cpl: cpl.deskripsi_cpl,
+            aspek: cpl.aspek,
+          }
+        })
+        .from(matrixCplBk)
+        .innerJoin(cpl, eq(matrixCplBk.id_cpl, cpl.id))
+        .where(eq(matrixCplBk.id_bk, bkItem.id));
+        
+        return {
+          ...bkItem,
+          cpl_list: matrixItems.map(m => m.cpl)
+        };
+      }));
+      
+      return c.json(successResponse(enrichedResult));
+    }
+    
     return c.json(successResponse(result));
   } catch (error) {
     return c.json(errorResponse('Gagal mengambil data bahan kajian'), 500);

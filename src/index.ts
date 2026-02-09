@@ -25,6 +25,7 @@ import {
   cpmkRoutes,
   rpsRoutes,
   laporanRoutes,
+  dashboardRoutes,
 } from './routes';
 
 type Bindings = {
@@ -69,6 +70,7 @@ app.get('/', (c) => c.json({
   timestamp: new Date().toISOString(),
   endpoints: {
     auth: '/api/auth',
+    dashboard: '/api/dashboard',
     prodi: '/api/prodi',
     kurikulum: '/api/kurikulum',
     profil_lulusan: '/api/profil-lulusan',
@@ -94,6 +96,9 @@ app.route('/api/auth', authRoutes);
 
 // ==================== Protected Routes ====================
 app.use('/api/*', authMiddleware);
+
+// Dashboard
+app.route('/api/dashboard', dashboardRoutes);
 
 // Prodi
 app.route('/api/prodi', prodiRoutes);

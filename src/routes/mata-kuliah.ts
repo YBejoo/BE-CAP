@@ -15,7 +15,7 @@ const app = new Hono<AppContext>();
 // GET /api/mata-kuliah
 app.get('/', async (c) => {
   const db = c.get('db');
-  const { id_kurikulum, semester, sifat } = c.req.query();
+  const { id_kurikulum, semester, sifat, enrich } = c.req.query();
 
   try {
     let query = db.select({
@@ -53,6 +53,52 @@ app.get('/', async (c) => {
     }
 
     const result = await query.orderBy(mataKuliah.semester, mataKuliah.kode_mk);
+    
+    // Enrich with cpl_list and dosen_pengampu if requested
+    if (enrich === 'true' || enrich === 'full') {
+      const enrichedResult = await Promise.all(result.map(async (mkItem) => {
+        // Get CPL list from matrix
+        const matrixItems = await db.select({
+          cpl: {
+            id: cpl.id,
+            kode_cpl: cpl.kode_cpl,
+            deskripsi_cpl: cpl.deskripsi_cpl,
+            aspek: cpl.aspek,
+          }
+        })
+        .from(matrixCplMk)
+        .innerJoin(cpl, eq(matrixCplMk.id_cpl, cpl.id))
+        .where(eq(matrixCplMk.id_mk, mkItem.id));
+        
+        // Get dosen pengampu
+        const dosenItems = await db.select({
+          id: penugasanDosen.id,
+          is_koordinator: penugasanDosen.is_koordinator,
+          dosen: {
+            id: dosen.id,
+            nip: dosen.nip,
+            nama_dosen: dosen.nama_dosen,
+            email: dosen.email,
+            bidang_keahlian: dosen.bidang_keahlian,
+          }
+        })
+        .from(penugasanDosen)
+        .innerJoin(dosen, eq(penugasanDosen.id_dosen, dosen.id))
+        .where(eq(penugasanDosen.id_mk, mkItem.id));
+        
+        return {
+          ...mkItem,
+          cpl_list: matrixItems.map(m => m.cpl),
+          dosen_pengampu: dosenItems.map(d => ({
+            ...d.dosen,
+            is_koordinator: d.is_koordinator
+          }))
+        };
+      }));
+      
+      return c.json(successResponse(enrichedResult));
+    }
+    
     return c.json(successResponse(result));
   } catch (error) {
     return c.json(errorResponse('Gagal mengambil data mata kuliah'), 500);
@@ -271,7 +317,16 @@ app.get('/:id/dosen', async (c) => {
   const { tahun_akademik, semester_akademik } = c.req.query();
 
   try {
-    let query = db.select({
+    // Build conditions
+    const conditions = [eq(penugasanDosen.id_mk, mkId)];
+    if (tahun_akademik) {
+      conditions.push(eq(penugasanDosen.tahun_akademik, tahun_akademik));
+    }
+    if (semester_akademik) {
+      conditions.push(eq(penugasanDosen.semester_akademik, semester_akademik as 'Ganjil' | 'Genap'));
+    }
+
+    const result = await db.select({
       id: penugasanDosen.id,
       is_koordinator: penugasanDosen.is_koordinator,
       tahun_akademik: penugasanDosen.tahun_akademik,
@@ -285,17 +340,7 @@ app.get('/:id/dosen', async (c) => {
     })
     .from(penugasanDosen)
     .innerJoin(dosen, eq(penugasanDosen.id_dosen, dosen.id))
-    .where(eq(penugasanDosen.id_mk, mkId));
-
-    // Apply filters
-    if (tahun_akademik) {
-      query = query.where(eq(penugasanDosen.tahun_akademik, tahun_akademik)) as typeof query;
-    }
-    if (semester_akademik) {
-      query = query.where(eq(penugasanDosen.semester_akademik, semester_akademik as 'Ganjil' | 'Genap')) as typeof query;
-    }
-
-    const result = await query;
+    .where(and(...conditions));
     return c.json(successResponse(result));
   } catch (error) {
     return c.json(errorResponse('Gagal mengambil data dosen'), 500);

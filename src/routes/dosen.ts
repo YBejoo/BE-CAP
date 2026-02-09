@@ -1,7 +1,7 @@
 // src/routes/dosen.ts
 import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
-import { eq, like, or } from 'drizzle-orm';
+import { eq, like, or, and } from 'drizzle-orm';
 import { nanoid } from 'nanoid';
 
 import { dosen, prodi, penugasanDosen, mataKuliah } from '../db/schema';
@@ -153,12 +153,32 @@ app.get('/:id/mata-kuliah', async (c) => {
     .where(eq(penugasanDosen.id_dosen, dosenId));
 
     // Apply filters
+    const conditions = [eq(penugasanDosen.id_dosen, dosenId)];
     if (tahun_akademik) {
-      query = query.where(eq(penugasanDosen.tahun_akademik, tahun_akademik)) as typeof query;
+      conditions.push(eq(penugasanDosen.tahun_akademik, tahun_akademik));
     }
     if (semester_akademik) {
-      query = query.where(eq(penugasanDosen.semester_akademik, semester_akademik as 'Ganjil' | 'Genap')) as typeof query;
+      conditions.push(eq(penugasanDosen.semester_akademik, semester_akademik as 'Ganjil' | 'Genap'));
     }
+
+    query = db.select({
+      penugasan: {
+        id: penugasanDosen.id,
+        is_koordinator: penugasanDosen.is_koordinator,
+        tahun_akademik: penugasanDosen.tahun_akademik,
+        semester_akademik: penugasanDosen.semester_akademik,
+      },
+      mata_kuliah: {
+        id: mataKuliah.id,
+        kode_mk: mataKuliah.kode_mk,
+        nama_mk: mataKuliah.nama_mk,
+        sks: mataKuliah.sks,
+        semester: mataKuliah.semester,
+      },
+    })
+    .from(penugasanDosen)
+    .innerJoin(mataKuliah, eq(penugasanDosen.id_mk, mataKuliah.id))
+    .where(and(...conditions));
 
     const result = await query.orderBy(mataKuliah.semester, mataKuliah.kode_mk);
     return c.json(successResponse(result));

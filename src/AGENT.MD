@@ -1155,6 +1155,8 @@ wrangler tail
 
 ## 🎯 Frontend Integration Guide
 
+> **Catatan Integrasi:** Disarankan menggunakan **Axios** sebagai HTTP client agar pengelolaan base URL, interceptor token, dan error handling lebih konsisten.
+
 ### Authentication Flow
 
 ```typescript

@@ -129,7 +129,7 @@ app.post('/refresh', async (c) => {
   const token = authHeader.substring(7);
 
   try {
-    const payload = await verify(token, c.env.JWT_SECRET) as any;
+    const payload = await verify(token, c.env.JWT_SECRET, 'HS256') as any;
     
     // Generate new token
     const newPayload = {
