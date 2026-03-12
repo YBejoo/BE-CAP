@@ -7,23 +7,10 @@ import { nanoid } from 'nanoid';
 
 import { users } from '../db/schema';
 import { successResponse, errorResponse } from '../utils/response';
+import { hashPassword, verifyPassword } from '../utils/helpers';
 import { registerSchema, loginSchema, changePasswordSchema } from '../validators/auth.validator';
 import { authMiddleware } from '../middleware/auth';
 import type { AppContext } from '../types';
-
-// Simple hash function for Workers environment
-async function hashPassword(password: string): Promise<string> {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(password);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-}
-
-async function verifyPassword(password: string, hash: string): Promise<boolean> {
-  const hashedInput = await hashPassword(password);
-  return hashedInput === hash;
-}
 
 const app = new Hono<AppContext>();
 

@@ -42,7 +42,18 @@ bun run db:generate
 bun run db:migrate
 ```
 
-### 5. Start Development Server
+### 5. Seed Database (Optional)
+
+Populate database with sample data for development:
+```bash
+bun run db:seed
+```
+
+> **Note:** Seeder will automatically clear all existing data before seeding. Safe to run multiple times.
+
+See [SEEDER-GUIDE.md](SEEDER-GUIDE.md) for detailed information.
+
+### 6. Start Development Server
 
 ```bash
 bun run dev
@@ -151,6 +162,8 @@ bun run deploy       # Deploy to Cloudflare
 bun run db:generate  # Generate migrations
 bun run db:migrate   # Apply migrations (local)
 bun run db:migrate:prod  # Apply migrations (production)
+bun run db:seed      # Seed database with sample data
+bun run db:reset     # Reset database (migrate + seed)
 bun run db:studio    # Open Drizzle Studio
 bun run typecheck    # TypeScript check
 ```

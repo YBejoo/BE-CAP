@@ -137,7 +137,34 @@ app.post('/', requireRole('admin', 'kaprodi'), zValidator('json', createCplSchem
     const result = await db.select().from(cpl).where(eq(cpl.id, id));
     return c.json(successResponse(result[0], 'CPL berhasil dibuat'), 201);
   } catch (error) {
-    return c.json(errorResponse('Gagal membuat CPL'), 500);
+    console.error('Error creating CPL:', error);
+    return c.json(errorResponse(`Gagal membuat CPL: ${error instanceof Error ? error.message : 'Unknown error'}`), 500);
+  }
+});
+
+// POST /api/cpl/:id (for update - supporting frontend POST requests)
+app.post('/:id', requireRole('admin', 'kaprodi'), zValidator('json', updateCplSchema), async (c) => {
+  const db = c.get('db');
+  const id = c.req.param('id');
+  const data = c.req.valid('json');
+
+  try {
+    // Check if CPL exists
+    const existing = await db.select().from(cpl).where(eq(cpl.id, id));
+    
+    if (existing.length === 0) {
+      return c.json(errorResponse('CPL tidak ditemukan'), 404);
+    }
+
+    // Update CPL
+    await db.update(cpl)
+      .set({ ...data, updated_at: new Date() })
+      .where(eq(cpl.id, id));
+
+    const result = await db.select().from(cpl).where(eq(cpl.id, id));
+    return c.json(successResponse(result[0], 'CPL berhasil diupdate'));
+  } catch (error) {
+    return c.json(errorResponse('Gagal mengupdate CPL'), 500);
   }
 });
 
